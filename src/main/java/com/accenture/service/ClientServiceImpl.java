@@ -48,8 +48,6 @@ public class ClientServiceImpl implements ClientService{
         client.setDateDInscription(LocalDate.now());
         client.setDesactive(false);
 
-        System.out.println(client);
-
         Client clientRetour = clientDAO.save(client);
         return clientMapper.toClientResponseDTO(clientRetour);
     }
@@ -94,7 +92,7 @@ public class ClientServiceImpl implements ClientService{
     private void verifierClient(ClientRequestDTO clientRequestDTO) throws ClientException {
         if(clientRequestDTO == null)
             throw new ClientException("Le client ne peut pas être .");
-        if(!clientDAO.existsByEmail(clientRequestDTO.email()))
+        if(clientDAO.existsByEmail(clientRequestDTO.email()))
                 throw new ClientException("Cet email est déjà utilisé.");
         if(clientRequestDTO.nom() == null || clientRequestDTO.nom().isBlank())
             throw new ClientException("Le nom du client est obligatoire.");

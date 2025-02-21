@@ -15,7 +15,6 @@ public record ClientResponseDTO(
         LocalDate dateDeNaissance,
         LocalDate dateDInscription,
         HashSet<Permis> permis,
-        Boolean desactive,
-        List<Location> locations
+        Boolean desactive
 ) {
 }

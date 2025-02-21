@@ -24,7 +24,5 @@ public class Client extends UtilisateurConnecte {
     private LocalDate dateDInscription;
     private HashSet<Permis> permis;
     private Boolean desactive;
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Location> locations;
 
 }
