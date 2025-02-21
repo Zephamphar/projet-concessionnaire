@@ -8,6 +8,8 @@ import com.accenture.service.dto.AdministrateurResponseDTO;
 import com.accenture.service.mapper.AdministrateurMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 public class AdministrateurServiceImpl implements AdministrateurService {
@@ -21,6 +23,13 @@ public class AdministrateurServiceImpl implements AdministrateurService {
         this.administrateurMapper = administrateurMapper;
     }
 
+    /**
+     * <p>Méthode permettant d'ajouter un Client en base</p>
+     * @param administrateurRequestDTO L'objet métier administrateur, non null
+     * @return AdministrateurResponseDTO
+     * @throws AdministrateurException Si l'Administrateur ne répond pas aux règles métier
+     */
+
     @Override
     public AdministrateurResponseDTO ajouter(AdministrateurRequestDTO administrateurRequestDTO) throws AdministrateurException {
         verifierAdministrateur(administrateurRequestDTO);
@@ -28,6 +37,11 @@ public class AdministrateurServiceImpl implements AdministrateurService {
 
         Administrateur adminRetour = administrateurDAO.save(admin);
         return administrateurMapper.toAdministrateurResponseDTO(adminRetour);
+    }
+
+    @Override
+    public List<AdministrateurResponseDTO> trouverTous() {
+        return List.of();
     }
 
     private void verifierAdministrateur(AdministrateurRequestDTO administrateurRequestDTO) throws AdministrateurException {
