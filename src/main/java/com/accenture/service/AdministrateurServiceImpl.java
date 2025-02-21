@@ -71,5 +71,4 @@ public class AdministrateurServiceImpl implements AdministrateurService {
             throw new AdministrateurException("La fonction est obligatoire");
     }
 
-
 }
