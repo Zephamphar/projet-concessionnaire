@@ -8,13 +8,11 @@ import com.accenture.service.dto.ClientRequestDTO;
 import com.accenture.service.dto.ClientResponseDTO;
 import com.accenture.service.mapper.AdministrateurMapper;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/administrateurs")
@@ -26,6 +24,11 @@ public class AdministrateurController {
     public AdministrateurController(AdministrateurService administrateurService, AdministrateurMapper administrateurMapper) {
         this.administrateurService = administrateurService;
         this.administrateurMapper = administrateurMapper;
+    }
+
+    @GetMapping
+    List<AdministrateurResponseDTO> trouverTous() {
+        return administrateurService.trouverTous();
     }
 
     @PostMapping

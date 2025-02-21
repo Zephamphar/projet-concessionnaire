@@ -1,5 +1,6 @@
 package com.accenture.controller.advice;
 
+import com.accenture.exception.AdministrateurException;
 import com.accenture.exception.ClientException;
 import com.accenture.repository.entity.Client;
 import com.accenture.service.dto.ErreurReponse;
@@ -15,6 +16,12 @@ public class ControllerAdvice {
 
     @ExceptionHandler(ClientException.class)
     public ResponseEntity<ErreurReponse> gestionClientException(ClientException ex) {
+        ErreurReponse erreurReponse = new ErreurReponse(LocalDateTime.now(), "Erreur fonctionnelle", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erreurReponse);
+    }
+
+    @ExceptionHandler(AdministrateurException.class)
+    public ResponseEntity<ErreurReponse> gestionClientException(AdministrateurException ex) {
         ErreurReponse erreurReponse = new ErreurReponse(LocalDateTime.now(), "Erreur fonctionnelle", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erreurReponse);
     }

@@ -39,14 +39,24 @@ public class AdministrateurServiceImpl implements AdministrateurService {
         return administrateurMapper.toAdministrateurResponseDTO(adminRetour);
     }
 
+    /**
+     * <p>Méthode permettant de récupérer tous les administrateurs de la base</p>
+     * @return Tous les administrateurs de la base dans une ArrayList
+     */
+
     @Override
     public List<AdministrateurResponseDTO> trouverTous() {
-        return List.of();
+        return administrateurDAO.findAll()
+                .stream()
+                .map(administrateurMapper::toAdministrateurResponseDTO)
+                .toList();
     }
 
     private void verifierAdministrateur(AdministrateurRequestDTO administrateurRequestDTO) throws AdministrateurException {
         if(administrateurRequestDTO == null)
            throw new AdministrateurException("L'administrateur ne peut pas être null");
+        if(administrateurDAO.existsByEmail(administrateurRequestDTO.email()))
+            throw new AdministrateurException("Cet email est déjà utilisé.");
         if(administrateurRequestDTO.nom() == null || administrateurRequestDTO.nom().isBlank())
            throw new AdministrateurException("Le nom est obligatoire.");
         if(administrateurRequestDTO.prenom() == null || administrateurRequestDTO.prenom().isBlank())
