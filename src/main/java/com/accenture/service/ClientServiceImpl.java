@@ -16,11 +16,17 @@ import java.time.Period;
 import java.util.HashSet;
 import java.util.List;
 
+/**
+ * Classe de Service gérant l'entité Client
+ * @author paulin.novotny
+ * @since 1.0
+ */
+
 @Service
 public class ClientServiceImpl implements ClientService{
 
-    ClientDAO clientDAO;
-    ClientMapper clientMapper;
+    private final ClientDAO clientDAO;
+    private final ClientMapper clientMapper;
     private final String REGEX_PASSWORD = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#@&-_§]).{8,16}$";
 
     public ClientServiceImpl(ClientDAO clientDAO, ClientMapper clientMapper) {
@@ -28,13 +34,21 @@ public class ClientServiceImpl implements ClientService{
         this.clientMapper = clientMapper;
     }
 
+    /**
+     * <p>Méthode permettant d'ajouter un Client en base</p>
+     * @param clientRequestDTO L'objet métier client, non null
+     * @return ClientResponseDTO
+     * @throws ClientException Si le client ne répond pas aux règles métier
+     */
     @Override
-    public ClientResponseDTO ajouter(ClientRequestDTO clientRequestDTO) {
+    public ClientResponseDTO ajouter(ClientRequestDTO clientRequestDTO) throws ClientException {
         verifierClient(clientRequestDTO);
         Client client = clientMapper.toClient(clientRequestDTO);
 
         client.setDateDInscription(LocalDate.now());
         client.setDesactive(false);
+
+        System.out.println(client);
 
         Client clientRetour = clientDAO.save(client);
         return clientMapper.toClientResponseDTO(clientRetour);
@@ -45,9 +59,17 @@ public class ClientServiceImpl implements ClientService{
         return null;
     }
 
+    /**
+     * <p>Méthode permettant de récupérer tous les clients de la base</p>
+     * @return Tous les clients de la base dans une ArrayList
+     */
+
     @Override
     public List<ClientResponseDTO> trouverTous() {
-        return List.of();
+        return clientDAO.findAll()
+                .stream()
+                .map(clientMapper::toClientResponseDTO)
+                .toList();
     }
 
     @Override
@@ -78,13 +100,13 @@ public class ClientServiceImpl implements ClientService{
             throw new ClientException("Le prenom du client est obligatoire.");
         if(clientRequestDTO.adresse() == null)
             throw new ClientException("L'adresse ne peut pas être null.");
-        if(clientRequestDTO.adresse().getNumero() == 0)
+        if(clientRequestDTO.adresse().numero() == 0)
             throw new ClientException("Le numéro d'adresse est obligatoire.");
-        if(clientRequestDTO.adresse().getRue() == null || clientRequestDTO.adresse().getRue().isBlank())
+        if(clientRequestDTO.adresse().rue() == null || clientRequestDTO.adresse().rue().isBlank())
             throw new ClientException("La rue est obligatoire.");
-        if(clientRequestDTO.adresse().getCodePostal() == null || clientRequestDTO.adresse().getCodePostal().isBlank())
+        if(clientRequestDTO.adresse().codePostal() == null || clientRequestDTO.adresse().codePostal().isBlank())
             throw new ClientException("Le code postal est obligatoire.");
-        if(clientRequestDTO.adresse().getVille() == null || clientRequestDTO.adresse().getVille().isBlank())
+        if(clientRequestDTO.adresse().ville() == null || clientRequestDTO.adresse().ville().isBlank())
             throw new ClientException("La ville est obligatoire.");
         if(clientRequestDTO.email() == null || clientRequestDTO.email().isBlank())
             throw new ClientException("L'e-mail est obligatoire.");

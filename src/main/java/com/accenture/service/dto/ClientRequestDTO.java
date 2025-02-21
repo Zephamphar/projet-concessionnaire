@@ -11,7 +11,7 @@ import java.util.List;
 public record ClientRequestDTO(
         String nom,
         String prenom,
-        Adresse adresse,
+        AdresseDTO adresse,
         String email,
         String password,
         LocalDate dateDeNaissance,
