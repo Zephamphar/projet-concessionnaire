@@ -10,8 +10,8 @@ import java.util.List;
 public record ClientResponseDTO(
         String nom,
         String prenom,
-        String email,
         AdresseDTO adresse,
+        String email,
         LocalDate dateDeNaissance,
         LocalDate dateDInscription,
         HashSet<Permis> permis,

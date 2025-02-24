@@ -116,18 +116,8 @@ public class ClientServiceImpl implements ClientService{
             throw new ClientException("Le mot de passe doit comporter au moins une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial parmi les suivants : & # @ - _ §");
         if(clientRequestDTO.dateDeNaissance() == null)
             throw new ClientException("La date de naissance est obligatoire");
-        if(LocalDate.now().minus(Period.between(clientRequestDTO.dateDeNaissance(), LocalDate.now())).getYear() < 18)
+        if(Period.between(clientRequestDTO.dateDeNaissance(), LocalDate.now()).getYears() < 18)
             throw new ClientException("Le client doit être majeur pour s'inscrire.");
     }
 
-//    String nom,
-//    String prenom,
-//    Adresse adresse,
-//    String email,
-//    String password,
-//    LocalDate dateDeNaissance,
-//    LocalDate dateDInscription,
-//    HashSet<Permis> permis,
-//    Boolean desactive,
-//    List<Location> locations
 }
