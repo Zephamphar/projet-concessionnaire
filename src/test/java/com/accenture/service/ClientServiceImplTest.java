@@ -29,7 +29,7 @@ class ClientServiceImplTest {
     @Mock
     ClientMapper mapperMock;
     @Mock
-    ClientDAO mockDAO;
+    ClientDAO DAOMock;
     @InjectMocks
     ClientServiceImpl clientService;
 
@@ -42,7 +42,7 @@ class ClientServiceImplTest {
     @DisplayName("Si l'email est déjà enregistré en base, exception levée")
     @Test
     void testAjouterClientExisteDeja() {
-        Mockito.when(mockDAO.existsByEmail("dylan@mail.com")).thenReturn(true);
+        Mockito.when(DAOMock.existsByEmail("dylan@mail.com")).thenReturn(true);
         ClientRequestDTO dylan = creerClientRequestDTODylan();
         assertThrows(ClientException.class, () -> clientService.ajouter(dylan));
     }
@@ -399,11 +399,11 @@ class ClientServiceImplTest {
         Client clientApres = creerClientDylan();
 
         Mockito.when(mapperMock.toClient(requestDTO)).thenReturn(clientAvant);
-        Mockito.when(mockDAO.save(clientAvant)).thenReturn(clientApres);
+        Mockito.when(DAOMock.save(clientAvant)).thenReturn(clientApres);
         Mockito.when(mapperMock.toClientResponseDTO(clientApres)).thenReturn(responseDTO);
 
         assertSame(responseDTO, clientService.ajouter(requestDTO));
-        Mockito.verify(mockDAO, Mockito.times(1)).save(clientAvant);
+        Mockito.verify(DAOMock, Mockito.times(1)).save(clientAvant);
 
     }
 

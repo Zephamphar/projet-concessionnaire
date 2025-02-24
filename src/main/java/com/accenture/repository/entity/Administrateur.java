@@ -14,4 +14,8 @@ public class Administrateur extends UtilisateurConnecte {
 
     private String fonction;
 
+    public Administrateur(String nom, String prenom, String email, String password, String fonction) {
+        super(nom, prenom, email, password);
+        this.fonction = fonction;
+    }
 }
