@@ -8,7 +8,7 @@ import java.util.List;
 public interface ClientService {
 
     ClientResponseDTO ajouter(ClientRequestDTO clientRequestDTO) throws ClientException;
-    ClientResponseDTO trouver(int id);
+    ClientResponseDTO recupererMonCompte(String email, String password);
     List<ClientResponseDTO> trouverTous();
     ClientResponseDTO modifier(int id, ClientRequestDTO clientRequestDTO);
     ClientResponseDTO modifierPartiellement(int id, ClientRequestDTO clientRequestDTO);

@@ -8,18 +8,21 @@ import com.accenture.service.dto.AdresseDTO;
 import com.accenture.service.dto.ClientRequestDTO;
 import com.accenture.service.dto.ClientResponseDTO;
 import com.accenture.service.mapper.ClientMapper;
-import com.shared.Permis;
+import com.accenture.shared.Permis;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,9 +30,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class ClientServiceImplTest {
 
     @Mock
-    ClientMapper mapperMock;
+    ClientMapper mockMapper;
     @Mock
-    ClientDAO DAOMock;
+    ClientDAO mockDao;
     @InjectMocks
     ClientServiceImpl clientService;
 
@@ -42,7 +45,7 @@ class ClientServiceImplTest {
     @DisplayName("Si l'email est déjà enregistré en base, exception levée")
     @Test
     void testAjouterClientExisteDeja() {
-        Mockito.when(DAOMock.existsByEmail("dylan@mail.com")).thenReturn(true);
+        Mockito.when(mockDao.existsByEmail("dylan@mail.com")).thenReturn(true);
         ClientRequestDTO dylan = creerClientRequestDTODylan();
         assertThrows(ClientException.class, () -> clientService.ajouter(dylan));
     }
@@ -392,19 +395,63 @@ class ClientServiceImplTest {
 
     @DisplayName("Si ajouter(ok), on récupère la ClientResponseDTO")
     @Test
-    void ajouterClientOK() {
+    void testAjouterClientOK() {
         ClientRequestDTO requestDTO = creerClientRequestDTODylan();
         ClientResponseDTO responseDTO = creerClientResponseDTODylan();
         Client clientAvant = creerClientDylan();
         Client clientApres = creerClientDylan();
 
-        Mockito.when(mapperMock.toClient(requestDTO)).thenReturn(clientAvant);
-        Mockito.when(DAOMock.save(clientAvant)).thenReturn(clientApres);
-        Mockito.when(mapperMock.toClientResponseDTO(clientApres)).thenReturn(responseDTO);
+        Mockito.when(mockMapper.toClient(requestDTO)).thenReturn(clientAvant);
+        Mockito.when(mockDao.save(clientAvant)).thenReturn(clientApres);
+        Mockito.when(mockMapper.toClientResponseDTO(clientApres)).thenReturn(responseDTO);
 
         assertSame(responseDTO, clientService.ajouter(requestDTO));
-        Mockito.verify(DAOMock, Mockito.times(1)).save(clientAvant);
+        Mockito.verify(mockDao, Mockito.times(1)).save(clientAvant);
 
+    }
+
+    @DisplayName("Si recupererMonCompte(email null), exception levée")
+    @Test
+    void testRecupererMonCompteEmailNull() {
+        assertThrows(ClientException.class, () -> clientService.recupererMonCompte(null, "P@55w0rd"));
+    }
+
+    @DisplayName("Si recupererMonCompte(email blank), exception levée")
+    @Test
+    void testRecupererMonCompteEmailBlank() {
+        assertThrows(ClientException.class, () -> clientService.recupererMonCompte("   \t   ", "P@55w0rd"));
+    }
+
+    @DisplayName("Si recupererMonCompte(password null), exception levée")
+    @Test
+    void testRecupererMonComptePasswordNull() {
+        assertThrows(ClientException.class, () -> clientService.recupererMonCompte("dylan@mail.com", null));
+    }
+
+    @DisplayName("Si recupererMonCompte(password blank), exception levée")
+    @Test
+    void testRecupererMonComptePasswordBlank() {
+        assertThrows(ClientException.class, () -> clientService.recupererMonCompte("dylan@mail.com", "   \t   "));
+    }
+
+    @DisplayName("Si recupererMonCompte(email non trouvé), exception levée")
+    @Test
+    void testRecupererMonCompteEmailNonTrouve() {
+        Mockito.when(mockDao.existsByEmail("test@teast.com")).thenReturn(false);
+        assertThrows(EntityNotFoundException.class, () -> clientService.recupererMonCompte("test@teast.com", "P@55w0rd"));
+    }
+
+    @DisplayName("Si ajouter(ok), on récupère la ClientResponseDTO")
+    @Test
+    void testRecupererMonCompteOK() {
+        ClientResponseDTO responseDTO = creerClientResponseDTODylan();
+        Client client = creerClientDylan();
+
+        Mockito.when(mockDao.existsByEmail("dylan@mail.com")).thenReturn(true);
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(client));
+        Mockito.when(mockMapper.toClientResponseDTO(client)).thenReturn(responseDTO);
+
+        assertSame(responseDTO, clientService.recupererMonCompte("dylan@mail.com", "P@55w0rd"));
     }
 
     private static Client creerClientDylan() {

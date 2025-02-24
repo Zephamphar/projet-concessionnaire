@@ -1,5 +1,7 @@
 package com.accenture.controller;
 
+import com.accenture.exception.AdministrateurException;
+import com.accenture.exception.ClientException;
 import com.accenture.service.AdministrateurService;
 import com.accenture.service.AdministrateurServiceImpl;
 import com.accenture.service.dto.AdministrateurRequestDTO;
@@ -7,6 +9,7 @@ import com.accenture.service.dto.AdministrateurResponseDTO;
 import com.accenture.service.dto.ClientRequestDTO;
 import com.accenture.service.dto.ClientResponseDTO;
 import com.accenture.service.mapper.AdministrateurMapper;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -29,6 +32,12 @@ public class AdministrateurController {
     @GetMapping
     List<AdministrateurResponseDTO> trouverTous() {
         return administrateurService.trouverTous();
+    }
+
+    @GetMapping("/moncompte")
+    ResponseEntity<AdministrateurResponseDTO> recupererMonCompte(String email, String password) throws AdministrateurException, EntityNotFoundException {
+        AdministrateurResponseDTO administrateur = administrateurService.recupererMonCompte(email, password);
+        return ResponseEntity.ok(administrateur);
     }
 
     @PostMapping

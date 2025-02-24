@@ -1,11 +1,9 @@
 package com.accenture.service.dto;
 
-import com.accenture.repository.entity.Location;
-import com.shared.Permis;
+import com.accenture.shared.Permis;
 
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.List;
 
 public record ClientResponseDTO(
         String nom,

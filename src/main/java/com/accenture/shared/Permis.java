@@ -1,4 +1,4 @@
-package com.shared;
+package com.accenture.shared;
 
 public enum Permis {
     A,

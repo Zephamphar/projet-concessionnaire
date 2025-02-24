@@ -1,14 +1,13 @@
 package com.accenture.service;
 
 import com.accenture.exception.AdministrateurException;
+import com.accenture.exception.ClientException;
 import com.accenture.repository.AdministrateurDAO;
 import com.accenture.repository.entity.Administrateur;
-import com.accenture.repository.entity.Adresse;
 import com.accenture.repository.entity.Client;
 import com.accenture.service.dto.*;
 import com.accenture.service.mapper.AdministrateurMapper;
-import com.shared.Permis;
-import org.checkerframework.checker.units.qual.A;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,9 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,9 +24,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class AdministrateurServiceImplTest {
 
     @Mock
-    AdministrateurMapper mapperMock;
+    AdministrateurMapper mockMapper;
     @Mock
-    AdministrateurDAO DAOMock;
+    AdministrateurDAO mockDao;
     @InjectMocks
     AdministrateurServiceImpl administrateurService;
 
@@ -42,7 +39,7 @@ class AdministrateurServiceImplTest {
     @DisplayName("Si l'email est déjà enregistré en base, exception levée")
     @Test
     void testAjouterAdministrateurExisteDeja() {
-        Mockito.when(DAOMock.existsByEmail("dylan@mail.com")).thenReturn(true);
+        Mockito.when(mockDao.existsByEmail("dylan@mail.com")).thenReturn(true);
         AdministrateurRequestDTO dylan = creerAdministrateurRequestDTODylan();
         assertThrows(AdministrateurException.class, () -> administrateurService.ajouter(dylan));
     }
@@ -198,13 +195,58 @@ class AdministrateurServiceImplTest {
         Administrateur administrateurAvant = creerAdministrateurDylan();
         Administrateur administrateurApres = creerAdministrateurDylan();
 
-        Mockito.when(mapperMock.toAdministrateur(requestDTO)).thenReturn(administrateurAvant);
-        Mockito.when(DAOMock.save(administrateurAvant)).thenReturn(administrateurApres);
-        Mockito.when(mapperMock.toAdministrateurResponseDTO(administrateurApres)).thenReturn(responseDTO);
+        Mockito.when(mockMapper.toAdministrateur(requestDTO)).thenReturn(administrateurAvant);
+        Mockito.when(mockDao.save(administrateurAvant)).thenReturn(administrateurApres);
+        Mockito.when(mockMapper.toAdministrateurResponseDTO(administrateurApres)).thenReturn(responseDTO);
 
         assertSame(responseDTO, administrateurService.ajouter(requestDTO));
-        Mockito.verify(DAOMock, Mockito.times(1)).save(administrateurAvant);
+        Mockito.verify(mockDao, Mockito.times(1)).save(administrateurAvant);
 
+    }
+
+
+    @DisplayName("Si recupererMonCompte(email null), exception levée")
+    @Test
+    void testRecupererMonCompteEmailNull() {
+        assertThrows(AdministrateurException.class, () -> administrateurService.recupererMonCompte(null, "P@55w0rd"));
+    }
+
+    @DisplayName("Si recupererMonCompte(email blank), exception levée")
+    @Test
+    void testRecupererMonCompteEmailBlank() {
+        assertThrows(AdministrateurException.class, () -> administrateurService.recupererMonCompte("   \t   ", "P@55w0rd"));
+    }
+
+    @DisplayName("Si recupererMonCompte(password null), exception levée")
+    @Test
+    void testRecupererMonComptePasswordNull() {
+        assertThrows(AdministrateurException.class, () -> administrateurService.recupererMonCompte("dylan@mail.com", null));
+    }
+
+    @DisplayName("Si recupererMonCompte(password blank), exception levée")
+    @Test
+    void testRecupererMonComptePasswordBlank() {
+        assertThrows(AdministrateurException.class, () -> administrateurService.recupererMonCompte("dylan@mail.com", "   \t   "));
+    }
+
+    @DisplayName("Si recupererMonCompte(email non trouvé), exception levée")
+    @Test
+    void testRecupererMonCompteEmailNonTrouve() {
+        Mockito.when(mockDao.existsByEmail("test@teast.com")).thenReturn(false);
+        assertThrows(EntityNotFoundException.class, () -> administrateurService.recupererMonCompte("test@teast.com", "P@55w0rd"));
+    }
+
+    @DisplayName("Si ajouter(ok), on récupère la ClientResponseDTO")
+    @Test
+    void testRecupererMonCompteOK() {
+        AdministrateurResponseDTO responseDTO = creerAdministrateurResponseDTODylan();
+        Administrateur administrateur = creerAdministrateurDylan();
+
+        Mockito.when(mockDao.existsByEmail("dylan@mail.com")).thenReturn(true);
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(administrateur));
+        Mockito.when(mockMapper.toAdministrateurResponseDTO(administrateur)).thenReturn(responseDTO);
+
+        assertSame(responseDTO, administrateurService.recupererMonCompte("dylan@mail.com", "P@55w0rd"));
     }
 
     private static Administrateur creerAdministrateurDylan() {
@@ -228,7 +270,6 @@ class AdministrateurServiceImplTest {
     }
 
     private static AdministrateurResponseDTO creerAdministrateurResponseDTODylan() {
-        HashSet<Permis> permis = new HashSet<>(List.of(Permis.B));
         return new AdministrateurResponseDTO(
                 "Demasse",
                 "Dylan",

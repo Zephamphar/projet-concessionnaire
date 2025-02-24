@@ -9,4 +9,6 @@ import java.util.List;
 public interface AdministrateurService {
     AdministrateurResponseDTO ajouter(AdministrateurRequestDTO administrateurRequestDTO) throws AdministrateurException;
     List<AdministrateurResponseDTO> trouverTous();
+
+    AdministrateurResponseDTO recupererMonCompte(String email, String password);
 }

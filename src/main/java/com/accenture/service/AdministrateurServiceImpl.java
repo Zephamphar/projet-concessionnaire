@@ -1,11 +1,13 @@
 package com.accenture.service;
 
 import com.accenture.exception.AdministrateurException;
+import com.accenture.exception.ClientException;
 import com.accenture.repository.AdministrateurDAO;
 import com.accenture.repository.entity.Administrateur;
 import com.accenture.service.dto.AdministrateurRequestDTO;
 import com.accenture.service.dto.AdministrateurResponseDTO;
 import com.accenture.service.mapper.AdministrateurMapper;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,6 +52,30 @@ public class AdministrateurServiceImpl implements AdministrateurService {
                 .stream()
                 .map(administrateurMapper::toAdministrateurResponseDTO)
                 .toList();
+    }
+
+    /**
+     * <p>Méthode permettant à un Administrateur de récupérer les informations de son compte</p>
+     * @param email Email de l'Administrateur
+     * @param password Mot de passe de l'Administrateur
+     * @return AdministrateurResponseDTO
+     * @throws EntityNotFoundException Si l'email demandé n'existe pas en base
+     * @throws AdministrateurException Si l'email ou le mot de passe est null ou blank
+     */
+
+    @Override
+    public AdministrateurResponseDTO recupererMonCompte(String email, String password) {
+        if(email == null || email.isBlank())
+            throw new AdministrateurException("L'email est obligatoire.");
+        if(password == null || password.isBlank())
+            throw new AdministrateurException("Le mot de passe est obligatoire.");
+        if (!administrateurDAO.existsByEmail(email))
+            throw new EntityNotFoundException("Aucun utilisateur à cet email.");
+        return administrateurMapper
+                .toAdministrateurResponseDTO(
+                        administrateurDAO.findByEmailAndPassword(email, password)
+                                .orElseThrow(() -> new ClientException("Mot de passe incorrect."))
+                );
     }
 
     private void verifierAdministrateur(AdministrateurRequestDTO administrateurRequestDTO) throws AdministrateurException {
