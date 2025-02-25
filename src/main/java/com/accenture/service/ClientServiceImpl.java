@@ -2,6 +2,7 @@ package com.accenture.service;
 
 import com.accenture.exception.ClientException;
 import com.accenture.repository.ClientDAO;
+import com.accenture.repository.entity.Adresse;
 import com.accenture.repository.entity.Client;
 import com.accenture.service.dto.ClientRequestDTO;
 import com.accenture.service.dto.ClientResponseDTO;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Classe de Service gérant l'entité Client
@@ -88,14 +90,21 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public ClientResponseDTO modifier(int id, ClientRequestDTO clientRequestDTO) {
-        return null;
+    public ClientResponseDTO modifierPartiellement(String email, String password, ClientRequestDTO clientRequestDTO) {
+        if(clientRequestDTO == null)
+            throw new ClientException("Aucune information reçue.");
+        Optional<Client> optionalClient = clientDAO.findByEmailAndPassword(email, password);
+        Client clientAModifier = optionalClient.orElseThrow(() -> new ClientException("Identifiants invalides"));
+
+        Client nouveauClient = clientMapper.toClient(clientRequestDTO);
+
+        remplacer(nouveauClient, clientAModifier);
+
+        Client clientEnregistre = clientDAO.save(clientAModifier);
+        return clientMapper.toClientResponseDTO(clientEnregistre);
     }
 
-    @Override
-    public ClientResponseDTO modifierPartiellement(int id, ClientRequestDTO clientRequestDTO) {
-        return null;
-    }
+
 
     @Override
     public void supprimer(String email, String password) throws ClientException {
@@ -144,6 +153,21 @@ public class ClientServiceImpl implements ClientService {
             throw new ClientException("La date de naissance est obligatoire");
         if (Period.between(clientRequestDTO.dateDeNaissance(), LocalDate.now()).getYears() < 18)
             throw new ClientException("Le client doit être majeur pour s'inscrire.");
+    }
+
+    private static void remplacer(Client nouveauClient, Client clientAModifier) {
+        if(nouveauClient.getPrenom() != null && !nouveauClient.getPrenom().isBlank())
+            clientAModifier.setPrenom(nouveauClient.getPrenom());
+        if(nouveauClient.getNom() != null && !nouveauClient.getNom().isBlank())
+            clientAModifier.setNom(nouveauClient.getNom());
+        if(nouveauClient.getPassword() != null && !nouveauClient.getPassword().isBlank())
+            clientAModifier.setPassword(nouveauClient.getPassword());
+        if(nouveauClient.getAdresse() != null)
+            clientAModifier.setAdresse(nouveauClient.getAdresse());
+        if(nouveauClient.getDateDeNaissance() != null)
+            clientAModifier.setDateDeNaissance(nouveauClient.getDateDeNaissance());
+        if(nouveauClient.getPermis() != null && !nouveauClient.getPermis().isEmpty())
+            clientAModifier.setPermis(nouveauClient.getPermis());
     }
 
 }
