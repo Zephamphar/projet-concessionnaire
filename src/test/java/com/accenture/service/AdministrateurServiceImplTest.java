@@ -247,6 +247,57 @@ class AdministrateurServiceImplTest {
         Mockito.when(mockMapper.toAdministrateurResponseDTO(administrateur)).thenReturn(responseDTO);
 
         assertSame(responseDTO, administrateurService.recupererMonCompte("dylan@mail.com", "P@55w0rd"));
+        Mockito.verify(mockDao, Mockito.times(1)).findByEmailAndPassword("dylan@mail.com", "P@55w0rd");
+    }
+
+    @DisplayName("Si supprimer(null, ok), exception levée")
+    @Test
+    void testSupprimerEmailNull() {
+        assertThrows(AdministrateurException.class, () -> administrateurService.supprimer(null, "P@55w0rd"));
+    }
+
+    @DisplayName("Si supprimer(blank, ok), exception levée")
+    @Test
+    void testSupprimerEmailBlank() {
+        assertThrows(AdministrateurException.class, () -> administrateurService.supprimer("   \t   ", "P@55w0rd"));
+    }
+
+    @DisplayName("Si supprimer(ok, null), exception levée")
+    @Test
+    void testSupprimerPasswordNull() {
+        assertThrows(AdministrateurException.class, () -> administrateurService.supprimer("dylan@mail.com", null));
+    }
+
+    @DisplayName("Si supprimer(ok, blank), exception levée")
+    @Test
+    void testSupprimerPasswordBlank() {
+        assertThrows(AdministrateurException.class, () -> administrateurService.supprimer("dylan@mail.com", "   \t   "));
+    }
+
+    @DisplayName("Si supprimer(email incorrect), exception levée")
+    @Test
+    void testSupprimerEmailIncorrect() {
+        Mockito.when(mockDao.findByEmailAndPassword("dlan@mail.com", "P@55w0rd")).thenReturn(Optional.empty());
+        AdministrateurException ex = assertThrows(AdministrateurException.class, () -> administrateurService.supprimer("dlan@mail.com", "P@55w0rd"));
+        assertEquals("Identifiants incorrects.", ex.getMessage());
+    }
+
+    @DisplayName("Si supprimer(password incorrect), exception levée")
+    @Test
+    void testSupprimerPasswordIncorrect() {
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "p@55w0rd")).thenReturn(Optional.empty());
+        AdministrateurException ex = assertThrows(AdministrateurException.class, () -> administrateurService.supprimer("dylan@mail.com", "p@55w0rd"));
+        assertEquals("Identifiants incorrects.", ex.getMessage());
+    }
+
+    @DisplayName("Si supprimer(ok, ok)")
+    @Test
+    void testSupprimerOK() {
+        Administrateur administrateur = creerAdministrateurDylan();
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(administrateur));
+        administrateurService.supprimer("dylan@mail.com", "P@55w0rd");
+        Mockito.verify(mockDao, Mockito.times(1)).delete(administrateur);
     }
 
     private static Administrateur creerAdministrateurDylan() {

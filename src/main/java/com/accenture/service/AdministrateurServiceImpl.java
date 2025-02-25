@@ -4,6 +4,7 @@ import com.accenture.exception.AdministrateurException;
 import com.accenture.exception.ClientException;
 import com.accenture.repository.AdministrateurDAO;
 import com.accenture.repository.entity.Administrateur;
+import com.accenture.repository.entity.Client;
 import com.accenture.service.dto.AdministrateurRequestDTO;
 import com.accenture.service.dto.AdministrateurResponseDTO;
 import com.accenture.service.mapper.AdministrateurMapper;
@@ -76,6 +77,17 @@ public class AdministrateurServiceImpl implements AdministrateurService {
                         administrateurDAO.findByEmailAndPassword(email, password)
                                 .orElseThrow(() -> new ClientException("Mot de passe incorrect."))
                 );
+    }
+
+    @Override
+    public void supprimer(String email, String password) throws AdministrateurException {
+        if(email == null || email.isBlank())
+            throw new AdministrateurException("L'email est obligatoire.");
+        if(password == null || password.isBlank())
+            throw new AdministrateurException("Le mot de passe est obligatoire.");
+        Administrateur administrateur = administrateurDAO.findByEmailAndPassword(email, password)
+                .orElseThrow(() -> new AdministrateurException("Identifiants incorrects."));
+        administrateurDAO.delete(administrateur);
     }
 
     private void verifierAdministrateur(AdministrateurRequestDTO administrateurRequestDTO) throws AdministrateurException {

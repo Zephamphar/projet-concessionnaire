@@ -66,12 +66,10 @@ public class ClientServiceImpl implements ClientService {
             throw new ClientException("L'email est obligatoire.");
         if(password == null || password.isBlank())
             throw new ClientException("Le mot de passe est obligatoire.");
-        if (!clientDAO.existsByEmail(email))
-            throw new EntityNotFoundException("Aucun utilisateur à cet email.");
         return clientMapper
                 .toClientResponseDTO(
                         clientDAO.findByEmailAndPassword(email, password)
-                                .orElseThrow(() -> new ClientException("Mot de passe incorrect."))
+                                .orElseThrow(() -> new ClientException("Identifiants incorrects."))
                 );
     }
 
@@ -100,8 +98,14 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public void supprimer(int id) {
-        //TODO
+    public void supprimer(String email, String password) throws ClientException {
+        if(email == null || email.isBlank())
+            throw new ClientException("L'email est obligatoire.");
+        if(password == null || password.isBlank())
+            throw new ClientException("Le mot de passe est obligatoire.");
+        Client client = clientDAO.findByEmailAndPassword(email, password)
+                                .orElseThrow(() -> new ClientException("Identifiants incorrects."));
+        clientDAO.delete(client);
     }
 
     /* ************************************ *

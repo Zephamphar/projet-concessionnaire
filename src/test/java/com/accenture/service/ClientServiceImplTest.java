@@ -437,21 +437,69 @@ class ClientServiceImplTest {
     @DisplayName("Si recupererMonCompte(email non trouvé), exception levée")
     @Test
     void testRecupererMonCompteEmailNonTrouve() {
-        Mockito.when(mockDao.existsByEmail("test@teast.com")).thenReturn(false);
-        assertThrows(EntityNotFoundException.class, () -> clientService.recupererMonCompte("test@teast.com", "P@55w0rd"));
+        assertThrows(ClientException.class, () -> clientService.recupererMonCompte("test@teast.com", "P@55w0rd"));
     }
 
-    @DisplayName("Si ajouter(ok), on récupère la ClientResponseDTO")
+    @DisplayName("Si recupererMonCompte(ok), on récupère la ClientResponseDTO")
     @Test
     void testRecupererMonCompteOK() {
         ClientResponseDTO responseDTO = creerClientResponseDTODylan();
         Client client = creerClientDylan();
 
-        Mockito.when(mockDao.existsByEmail("dylan@mail.com")).thenReturn(true);
         Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(client));
         Mockito.when(mockMapper.toClientResponseDTO(client)).thenReturn(responseDTO);
 
         assertSame(responseDTO, clientService.recupererMonCompte("dylan@mail.com", "P@55w0rd"));
+    }
+
+    @DisplayName("Si supprimer(null, ok), exception levée")
+    @Test
+    void testSupprimerEmailNull() {
+        assertThrows(ClientException.class, () -> clientService.supprimer(null, "P@55w0rd"));
+    }
+
+    @DisplayName("Si supprimer(blank, ok), exception levée")
+    @Test
+    void testSupprimerEmailBlank() {
+        assertThrows(ClientException.class, () -> clientService.supprimer("   \t   ", "P@55w0rd"));
+    }
+
+    @DisplayName("Si supprimer(ok, null), exception levée")
+    @Test
+    void testSupprimerPasswordNull() {
+        assertThrows(ClientException.class, () -> clientService.supprimer("dylan@mail.com", null));
+    }
+
+    @DisplayName("Si supprimer(ok, blank), exception levée")
+    @Test
+    void testSupprimerPasswordBlank() {
+        assertThrows(ClientException.class, () -> clientService.supprimer("dylan@mail.com", "   \t   "));
+    }
+
+    @DisplayName("Si supprimer(email incorrect), exception levée")
+    @Test
+    void testSupprimerEmailIncorrect() {
+        Mockito.when(mockDao.findByEmailAndPassword("dlan@mail.com", "P@55w0rd")).thenReturn(Optional.empty());
+        ClientException ex = assertThrows(ClientException.class, () -> clientService.supprimer("dlan@mail.com", "P@55w0rd"));
+        assertEquals("Identifiants incorrects.", ex.getMessage());
+    }
+
+    @DisplayName("Si supprimer(password incorrect), exception levée")
+    @Test
+    void testSupprimerPasswordIncorrect() {
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "p@55w0rd")).thenReturn(Optional.empty());
+        ClientException ex = assertThrows(ClientException.class, () -> clientService.supprimer("dylan@mail.com", "p@55w0rd"));
+        assertEquals("Identifiants incorrects.", ex.getMessage());
+    }
+
+    @DisplayName("Si supprimer(ok, ok)")
+    @Test
+    void testSupprimerOK() {
+        Client client = creerClientDylan();
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(client));
+        clientService.supprimer("dylan@mail.com", "P@55w0rd");
+        Mockito.verify(mockDao, Mockito.times(1)).delete(client);
     }
 
     private static Client creerClientDylan() {
@@ -497,6 +545,8 @@ class ClientServiceImplTest {
                 false
         );
     }
+
+
 
 
 }

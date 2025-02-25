@@ -1,10 +1,12 @@
 package com.accenture.controller;
 
 import com.accenture.exception.ClientException;
+import com.accenture.repository.entity.Client;
 import com.accenture.service.ClientService;
 import com.accenture.service.dto.ClientRequestDTO;
 import com.accenture.service.dto.ClientResponseDTO;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -43,5 +45,11 @@ public class ClientController {
                 .toUri();
 
         return ResponseEntity.created(location).build();
+    }
+
+    @DeleteMapping
+    ResponseEntity<Void> supprimer(String email, String password) throws ClientException {
+        clientService.supprimer(email, password);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
