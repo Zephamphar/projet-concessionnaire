@@ -79,6 +79,13 @@ public class AdministrateurServiceImpl implements AdministrateurService {
                 );
     }
 
+    /**4
+     * <p>Méthode permettant à un Administrateur de supprimer son propre compte.</p>
+     * @param email E-mail de l'Administrateur
+     * @param password Mot de passe de l'Administrateur
+     * @throws AdministrateurException Si l'email/le mot de passe n'est pas renseigné, si les identifiants sont incorrects, ou si l'Administrateur est le seul dans la base
+     */
+
     @Override
     public void supprimer(String email, String password) throws AdministrateurException {
         if(email == null || email.isBlank())
@@ -87,6 +94,9 @@ public class AdministrateurServiceImpl implements AdministrateurService {
             throw new AdministrateurException("Le mot de passe est obligatoire.");
         Administrateur administrateur = administrateurDAO.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new AdministrateurException("Identifiants incorrects."));
+        if(administrateurDAO.findAll().size() == 1)
+            throw new AdministrateurException("Impossible de supprimer le seul administrateur.");
+
         administrateurDAO.delete(administrateur);
     }
 

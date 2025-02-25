@@ -504,6 +504,7 @@ class ClientServiceImplTest {
 
     private static Client creerClientDylan() {
         HashSet<Permis> permis = new HashSet<>(List.of(Permis.B));
+
         return new Client(
                 "Demasse",
                 "Dylan",

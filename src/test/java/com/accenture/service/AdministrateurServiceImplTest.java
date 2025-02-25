@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -290,14 +291,26 @@ class AdministrateurServiceImplTest {
         assertEquals("Identifiants incorrects.", ex.getMessage());
     }
 
+    @DisplayName("Si supprimer(ok, ok) mais qu'il n'existe qu'un seul Administrateur, exception levée")
+    @Test
+    void testSupprimerLeDernierAdministrateur() {
+        Administrateur administrateur = creerAdministrateurDylan();
+
+        Mockito.when(mockDao.findAll()).thenReturn(List.of(administrateur));
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(administrateur));
+        assertThrows(AdministrateurException.class, () -> administrateurService.supprimer("dylan@mail.com", "P@55w0rd"));
+    }
+
     @DisplayName("Si supprimer(ok, ok)")
     @Test
     void testSupprimerOK() {
-        Administrateur administrateur = creerAdministrateurDylan();
+        Administrateur administrateur1 = creerAdministrateurDylan();
+        Administrateur administrateur2 = creerAdministrateurVictorien();
 
-        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(administrateur));
+        Mockito.when(mockDao.findAll()).thenReturn(List.of(administrateur1, administrateur2));
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(administrateur1));
         administrateurService.supprimer("dylan@mail.com", "P@55w0rd");
-        Mockito.verify(mockDao, Mockito.times(1)).delete(administrateur);
+        Mockito.verify(mockDao, Mockito.times(1)).delete(administrateur1);
     }
 
     private static Administrateur creerAdministrateurDylan() {
@@ -307,6 +320,16 @@ class AdministrateurServiceImplTest {
                 "dylan@mail.com",
                 "P@55w0rd",
                 "CEO"
+        );
+    }
+
+    private static Administrateur creerAdministrateurVictorien() {
+        return new Administrateur(
+                "Temple",
+                "Victorien",
+                "victorien@mail.com",
+                "P@55w0rd",
+                "CTO"
         );
     }
 

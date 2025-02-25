@@ -2,12 +2,11 @@ package com.accenture.repository.entity;
 
 import com.accenture.shared.Permis;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -32,6 +31,7 @@ public class Client extends UtilisateurConnecte {
         this.permis = new HashSet<>();
         this.desactive = desactive;
     }
+
 
 
 }

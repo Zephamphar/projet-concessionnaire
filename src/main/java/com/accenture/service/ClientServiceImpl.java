@@ -106,6 +106,9 @@ public class ClientServiceImpl implements ClientService {
         Client client = clientDAO.findByEmailAndPassword(email, password)
                                 .orElseThrow(() -> new ClientException("Identifiants incorrects."));
         clientDAO.delete(client);
+
+        /*TODO Vérifier si le Client a des locations passées. Si oui, désactiver son compte. Si non, supprimer son compte.
+        À implémenter après que la gestion des locations a été mise en place*/
     }
 
     /* ************************************ *
