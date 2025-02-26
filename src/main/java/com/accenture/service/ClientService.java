@@ -9,6 +9,6 @@ public interface ClientService {
 
     ClientResponseDTO ajouter(ClientRequestDTO clientRequestDTO) throws ClientException;
     ClientResponseDTO recupererMonCompte(String email, String password);
-    ClientResponseDTO modifierPartiellement(String email, String password, ClientRequestDTO clientRequestDTO);
+    ClientResponseDTO modifier(String email, String password, ClientRequestDTO clientRequestDTO);
     void supprimer(String email, String password) throws ClientException;
     List<ClientResponseDTO> trouverTous();}

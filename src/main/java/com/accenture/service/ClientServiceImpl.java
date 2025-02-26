@@ -90,7 +90,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public ClientResponseDTO modifierPartiellement(String email, String password, ClientRequestDTO clientRequestDTO) {
+    public ClientResponseDTO modifier(String email, String password, ClientRequestDTO clientRequestDTO) {
         if(clientRequestDTO == null)
             throw new ClientException("Aucune information reçue.");
         Optional<Client> optionalClient = clientDAO.findByEmailAndPassword(email, password);
@@ -103,8 +103,6 @@ public class ClientServiceImpl implements ClientService {
         Client clientEnregistre = clientDAO.save(clientAModifier);
         return clientMapper.toClientResponseDTO(clientEnregistre);
     }
-
-
 
     @Override
     public void supprimer(String email, String password) throws ClientException {
@@ -126,7 +124,7 @@ public class ClientServiceImpl implements ClientService {
 
     private void verifierClient(ClientRequestDTO clientRequestDTO) throws ClientException {
         if (clientRequestDTO == null)
-            throw new ClientException("Le client ne peut pas être .");
+            throw new ClientException("Le client ne peut pas être null.");
         if (clientDAO.existsByEmail(clientRequestDTO.email()))
             throw new ClientException("Cet email est déjà utilisé.");
         if (clientRequestDTO.nom() == null || clientRequestDTO.nom().isBlank())
@@ -155,19 +153,32 @@ public class ClientServiceImpl implements ClientService {
             throw new ClientException("Le client doit être majeur pour s'inscrire.");
     }
 
-    private static void remplacer(Client nouveauClient, Client clientAModifier) {
+    private void remplacer(Client nouveauClient, Client clientAModifier) {
+        if(nouveauClient.getPassword() != null && !nouveauClient.getPassword().isBlank()) {
+            if (!nouveauClient.getPassword().matches(REGEX_PASSWORD))
+                throw new ClientException("Le mot de passe doit comporter au moins une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial parmi les suivants : & # @ - _ §");
+            clientAModifier.setPassword(nouveauClient.getPassword());
+        }
         if(nouveauClient.getPrenom() != null && !nouveauClient.getPrenom().isBlank())
             clientAModifier.setPrenom(nouveauClient.getPrenom());
         if(nouveauClient.getNom() != null && !nouveauClient.getNom().isBlank())
             clientAModifier.setNom(nouveauClient.getNom());
-        if(nouveauClient.getPassword() != null && !nouveauClient.getPassword().isBlank())
-            clientAModifier.setPassword(nouveauClient.getPassword());
-        if(nouveauClient.getAdresse() != null)
-            clientAModifier.setAdresse(nouveauClient.getAdresse());
+        if(nouveauClient.getAdresse() != null) {
+            if(nouveauClient.getAdresse().getNumero() != 0)
+                clientAModifier.getAdresse().setNumero(nouveauClient.getAdresse().getNumero());
+            if(nouveauClient.getAdresse().getRue() != null && !nouveauClient.getAdresse().getRue().isBlank())
+                clientAModifier.getAdresse().setRue(nouveauClient.getAdresse().getRue());
+            if(nouveauClient.getAdresse().getCodePostal() != null && !nouveauClient.getAdresse().getCodePostal().isBlank())
+                clientAModifier.getAdresse().setCodePostal(nouveauClient.getAdresse().getCodePostal());
+            if(nouveauClient.getAdresse().getVille() != null && !nouveauClient.getAdresse().getVille().isBlank())
+                clientAModifier.getAdresse().setVille(nouveauClient.getAdresse().getVille());
+        }
         if(nouveauClient.getDateDeNaissance() != null)
             clientAModifier.setDateDeNaissance(nouveauClient.getDateDeNaissance());
-        if(nouveauClient.getPermis() != null && !nouveauClient.getPermis().isEmpty())
-            clientAModifier.setPermis(nouveauClient.getPermis());
+        if(nouveauClient.getPermis() != null && !nouveauClient.getPermis().isEmpty()) {
+            clientAModifier.getPermis().clear();
+            clientAModifier.getPermis().addAll(nouveauClient.getPermis());
+        }
     }
 
 }

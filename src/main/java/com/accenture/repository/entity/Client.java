@@ -23,6 +23,7 @@ public class Client extends UtilisateurConnecte {
     private HashSet<Permis> permis;
     private Boolean desactive;
 
+    @Builder
     public Client(String nom, String prenom, String email, String password, Adresse adresse, LocalDate dateDeNaissance, LocalDate dateDInscription, HashSet<Permis> permis, Boolean desactive) {
         super(nom, prenom, email, password);
         this.adresse = adresse;

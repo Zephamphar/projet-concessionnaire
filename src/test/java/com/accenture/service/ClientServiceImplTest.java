@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.mock.MockType;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -502,6 +503,431 @@ class ClientServiceImplTest {
         Mockito.verify(mockDao, Mockito.times(1)).delete(client);
     }
 
+    @DisplayName("Si modifier(null), exception levée")
+    @Test
+    void testModifierNull() {
+        assertThrows(ClientException.class, () -> clientService.modifier("dylan@mail.com", "P@55w0rd", null));
+    }
+
+    @DisplayName("Si modifier(email incorrect), exception levée")
+    @Test
+    void testModifierEmailIncorrect() {
+        ClientRequestDTO requestDTO = creerClientRequestDTODylan();
+
+        Mockito.when(mockDao.findByEmailAndPassword("dlan@mail.com", "P@55w0rd")).thenReturn(Optional.empty());
+        assertThrows(ClientException.class, () -> clientService.modifier("dlan@mail.com", "P@55w0rd", requestDTO));
+    }
+
+    @DisplayName("Si modifier(password incorrect), exception levée")
+    @Test
+    void testModifierPasswordIncorrect() {
+        ClientRequestDTO requestDTO = creerClientRequestDTODylan();
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P55w0rd")).thenReturn(Optional.empty());
+        assertThrows(ClientException.class, () -> clientService.modifier("dylan@mail.com", "P55w0rd", requestDTO));
+    }
+
+    @DisplayName("Si modifier(email ok, password ok, modifier prenom)")
+    @Test
+    void testModifierPrenom() {
+        Client clientAModifier = creerClientDylan();
+
+        ClientRequestDTO requestDTO = ClientRequestDTO.builder()
+                .prenom("Maleck Jr")
+                .build();
+
+        Client clientInfosAModifier = Client.builder()
+                .prenom("Maleck Jr")
+                .build();
+
+        Client clientAEnregistrer = creerClientDylan();
+        clientAEnregistrer.setPrenom(clientInfosAModifier.getPrenom());
+
+        Client clientEnregistre = creerClientDylan();
+        clientEnregistre.setPrenom(clientInfosAModifier.getPrenom());
+
+        HashSet<Permis> permis = new HashSet<>(List.of(Permis.B));
+        ClientResponseDTO responseDTO = new ClientResponseDTO(
+                "Demasse",
+                "Maleck Jr",
+                new AdresseDTO(48, "rue Hector Berlioz", "44300", "Nantes"),
+                "dylan@mail.com",
+                LocalDate.of(1999, 7, 17),
+                LocalDate.now(),
+                permis,
+                false
+        );
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(clientAModifier));
+        Mockito.when(mockMapper.toClient(requestDTO)).thenReturn(clientInfosAModifier);
+        Mockito.when(mockDao.save(clientAEnregistrer)).thenReturn(clientEnregistre);
+        Mockito.when(mockMapper.toClientResponseDTO(clientEnregistre)).thenReturn(responseDTO);
+
+        assertEquals(responseDTO, clientService.modifier("dylan@mail.com", "P@55w0rd", requestDTO));
+        Mockito.verify(mockDao, Mockito.times(1)).save(clientAEnregistrer);
+    }
+
+
+    @DisplayName("Si modifier(email ok, password ok, modifier nom)")
+    @Test
+    void testModifierNom() {
+        Client clientAModifier = creerClientDylan();
+
+        ClientRequestDTO requestDTO = ClientRequestDTO.builder()
+                .nom("Morgan")
+                .build();
+
+        Client clientInfosAModifier = Client.builder()
+                .nom("Morgan")
+                .build();
+
+        Client clientAEnregistrer = creerClientDylan();
+        clientAEnregistrer.setNom(clientInfosAModifier.getNom());
+
+        Client clientEnregistre = creerClientDylan();
+        clientEnregistre.setNom(clientInfosAModifier.getNom());
+
+        HashSet<Permis> permis = new HashSet<>(List.of(Permis.B));
+        ClientResponseDTO responseDTO = new ClientResponseDTO(
+                "Morgan",
+                "Dylan",
+                new AdresseDTO(48, "rue Hector Berlioz", "44300", "Nantes"),
+                "dylan@mail.com",
+                LocalDate.of(1999, 7, 17),
+                LocalDate.now(),
+                permis,
+                false
+        );
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(clientAModifier));
+        Mockito.when(mockMapper.toClient(requestDTO)).thenReturn(clientInfosAModifier);
+        Mockito.when(mockDao.save(clientAEnregistrer)).thenReturn(clientEnregistre);
+        Mockito.when(mockMapper.toClientResponseDTO(clientEnregistre)).thenReturn(responseDTO);
+
+        assertEquals(responseDTO, clientService.modifier("dylan@mail.com", "P@55w0rd", requestDTO));
+        Mockito.verify(mockDao, Mockito.times(1)).save(clientAEnregistrer);
+    }
+
+    @DisplayName("Si modifier(email ok, password ok, modifier password non conforme), exception levée")
+    @Test
+    void testModifierPasswordNonConforme() {
+        Client clientAModifier = creerClientDylan();
+
+        ClientRequestDTO requestDTO = ClientRequestDTO.builder()
+                .password("password")
+                .build();
+
+        Client clientInfosAModifier = Client.builder()
+                .password("password")
+                .build();
+
+        Client clientAEnregistrer = creerClientDylan();
+        clientAEnregistrer.setPassword(clientInfosAModifier.getPassword());
+
+        Client clientEnregistre = creerClientDylan();
+        clientEnregistre.setPassword(clientInfosAModifier.getPassword());
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(clientAModifier));
+        Mockito.when(mockMapper.toClient(requestDTO)).thenReturn(clientInfosAModifier);
+
+        assertThrows(ClientException.class, () -> clientService.modifier("dylan@mail.com", "P@55w0rd", requestDTO));
+    }
+
+    @DisplayName("Si modifier(email ok, password ok, modifier password)")
+    @Test
+    void testModifierPasswordOK() {
+        Client clientAModifier = creerClientDylan();
+
+        ClientRequestDTO requestDTO = ClientRequestDTO.builder()
+                .password("P@55w0rd1")
+                .build();
+
+        Client clientInfosAModifier = Client.builder()
+                .password("P@55w0rd1")
+                .build();
+
+        Client clientAEnregistrer = creerClientDylan();
+        clientAEnregistrer.setPassword(clientInfosAModifier.getPassword());
+
+        Client clientEnregistre = creerClientDylan();
+        clientEnregistre.setPassword(clientInfosAModifier.getPassword());
+
+        HashSet<Permis> permis = new HashSet<>(List.of(Permis.B));
+        ClientResponseDTO responseDTO = new ClientResponseDTO(
+                "Morgan",
+                "Dylan",
+                new AdresseDTO(48, "rue Hector Berlioz", "44300", "Nantes"),
+                "dylan@mail.com",
+                LocalDate.of(1999, 7, 17),
+                LocalDate.now(),
+                permis,
+                false
+        );
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(clientAModifier));
+        Mockito.when(mockMapper.toClient(requestDTO)).thenReturn(clientInfosAModifier);
+        Mockito.when(mockDao.save(clientAEnregistrer)).thenReturn(clientEnregistre);
+        Mockito.when(mockMapper.toClientResponseDTO(clientEnregistre)).thenReturn(responseDTO);
+
+        assertEquals(responseDTO, clientService.modifier("dylan@mail.com", "P@55w0rd", requestDTO));
+        Mockito.verify(mockDao, Mockito.times(1)).save(clientAEnregistrer);
+    }
+
+    @DisplayName("Si modifier(email ok, password ok, modifier numero adresse)")
+    @Test
+    void testModifierAdresseNumero() {
+        Client clientAModifier = creerClientDylan();
+
+        ClientRequestDTO requestDTO = ClientRequestDTO.builder()
+                .adresse(new AdresseDTO(5, null, null, null))
+                .build();
+
+        Client clientInfosAModifier = Client.builder()
+                .adresse(new Adresse(5, null, null, null))
+                .build();
+
+        Client clientAEnregistrer = creerClientDylan();
+        clientAEnregistrer.getAdresse().setNumero(clientInfosAModifier.getAdresse().getNumero());
+
+        Client clientEnregistre = creerClientDylan();
+        clientEnregistre.getAdresse().setNumero(clientInfosAModifier.getAdresse().getNumero());
+
+        HashSet<Permis> permis = new HashSet<>(List.of(Permis.B));
+        ClientResponseDTO responseDTO = new ClientResponseDTO(
+                "Morgan",
+                "Dylan",
+                new AdresseDTO(5, "rue Hector Berlioz", "44300", "Nantes"),
+                "dylan@mail.com",
+                LocalDate.of(1999, 7, 17),
+                LocalDate.now(),
+                permis,
+                false
+        );
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(clientAModifier));
+        Mockito.when(mockMapper.toClient(requestDTO)).thenReturn(clientInfosAModifier);
+        Mockito.when(mockDao.save(clientAEnregistrer)).thenReturn(clientEnregistre);
+        Mockito.when(mockMapper.toClientResponseDTO(clientEnregistre)).thenReturn(responseDTO);
+
+        assertEquals(responseDTO, clientService.modifier("dylan@mail.com", "P@55w0rd", requestDTO));
+        Mockito.verify(mockDao, Mockito.times(1)).save(clientAEnregistrer);
+    }
+
+    @DisplayName("Si modifier(email ok, password ok, modifier rue adresse)")
+    @Test
+    void testModifierAdresseRue() {
+        Client clientAModifier = creerClientDylan();
+
+        ClientRequestDTO requestDTO = ClientRequestDTO.builder()
+                .adresse(new AdresseDTO(0, "avenue du Soleil", null, null))
+                .build();
+
+        Client clientInfosAModifier = Client.builder()
+                .adresse(new Adresse(0, "avenue du Soleil", null, null))
+                .build();
+
+        Client clientAEnregistrer = creerClientDylan();
+        clientAEnregistrer.getAdresse().setRue(clientInfosAModifier.getAdresse().getRue());
+
+        Client clientEnregistre = creerClientDylan();
+        clientEnregistre.getAdresse().setRue(clientInfosAModifier.getAdresse().getRue());
+
+        HashSet<Permis> permis = new HashSet<>(List.of(Permis.B));
+        ClientResponseDTO responseDTO = new ClientResponseDTO(
+                "Morgan",
+                "Dylan",
+                new AdresseDTO(5, "avenue du Soleil", "44300", "Nantes"),
+                "dylan@mail.com",
+                LocalDate.of(1999, 7, 17),
+                LocalDate.now(),
+                permis,
+                false
+        );
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(clientAModifier));
+        Mockito.when(mockMapper.toClient(requestDTO)).thenReturn(clientInfosAModifier);
+        Mockito.when(mockDao.save(clientAEnregistrer)).thenReturn(clientEnregistre);
+        Mockito.when(mockMapper.toClientResponseDTO(clientEnregistre)).thenReturn(responseDTO);
+
+        assertEquals(responseDTO, clientService.modifier("dylan@mail.com", "P@55w0rd", requestDTO));
+        Mockito.verify(mockDao, Mockito.times(1)).save(clientAEnregistrer);
+    }
+
+    @DisplayName("Si modifier(email ok, password ok, modifier code postal adresse)")
+    @Test
+    void testModifierAdresseCodePostal() {
+        Client clientAModifier = creerClientDylan();
+
+        ClientRequestDTO requestDTO = ClientRequestDTO.builder()
+                .adresse(new AdresseDTO(0, null, "06960", null))
+                .build();
+
+        Client clientInfosAModifier = Client.builder()
+                .adresse(new Adresse(0, null, "06960", null))
+                .build();
+
+        Client clientAEnregistrer = creerClientDylan();
+        clientAEnregistrer.getAdresse().setCodePostal(clientInfosAModifier.getAdresse().getCodePostal());
+
+        Client clientEnregistre = creerClientDylan();
+        clientEnregistre.getAdresse().setCodePostal(clientInfosAModifier.getAdresse().getCodePostal());
+
+        HashSet<Permis> permis = new HashSet<>(List.of(Permis.B));
+        ClientResponseDTO responseDTO = new ClientResponseDTO(
+                "Morgan",
+                "Dylan",
+                new AdresseDTO(5, "rue Hector Berlioz", "06960", "Nantes"),
+                "dylan@mail.com",
+                LocalDate.of(1999, 7, 17),
+                LocalDate.now(),
+                permis,
+                false
+        );
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(clientAModifier));
+        Mockito.when(mockMapper.toClient(requestDTO)).thenReturn(clientInfosAModifier);
+        Mockito.when(mockDao.save(clientAEnregistrer)).thenReturn(clientEnregistre);
+        Mockito.when(mockMapper.toClientResponseDTO(clientEnregistre)).thenReturn(responseDTO);
+
+        assertEquals(responseDTO, clientService.modifier("dylan@mail.com", "P@55w0rd", requestDTO));
+        Mockito.verify(mockDao, Mockito.times(1)).save(clientAEnregistrer);
+    }
+
+    @DisplayName("Si modifier(email ok, password ok, modifier ville adresse)")
+    @Test
+    void testModifierAdresseVille() {
+        Client clientAModifier = creerClientDylan();
+
+        ClientRequestDTO requestDTO = ClientRequestDTO.builder()
+                .adresse(new AdresseDTO(0, null, null, "Montpellier"))
+                .build();
+
+        Client clientInfosAModifier = Client.builder()
+                .adresse(new Adresse(0, null, null, "Montpellier"))
+                .build();
+
+        Client clientAEnregistrer = creerClientDylan();
+            clientAEnregistrer.getAdresse().setVille(clientInfosAModifier.getAdresse().getVille());
+
+        Client clientEnregistre = creerClientDylan();
+        clientEnregistre.getAdresse().setVille(clientInfosAModifier.getAdresse().getVille());
+
+        HashSet<Permis> permis = new HashSet<>(List.of(Permis.B));
+        ClientResponseDTO responseDTO = new ClientResponseDTO(
+                "Morgan",
+                "Dylan",
+                new AdresseDTO(5, "rue Hector Berlioz", "44300", "Montpellier"),
+                "dylan@mail.com",
+                LocalDate.of(1999, 7, 17),
+                LocalDate.now(),
+                permis,
+                false
+        );
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(clientAModifier));
+        Mockito.when(mockMapper.toClient(requestDTO)).thenReturn(clientInfosAModifier);
+        Mockito.when(mockDao.save(clientAEnregistrer)).thenReturn(clientEnregistre);
+        Mockito.when(mockMapper.toClientResponseDTO(clientEnregistre)).thenReturn(responseDTO);
+
+        assertEquals(responseDTO, clientService.modifier("dylan@mail.com", "P@55w0rd", requestDTO));
+        Mockito.verify(mockDao, Mockito.times(1)).save(clientAEnregistrer);
+    }
+
+    @DisplayName("Si modifier(email ok, password ok, modifier date de naissance)")
+    @Test
+    void testModifierDateNaissance() {
+        Client clientAModifier = creerClientDylan();
+
+        ClientRequestDTO requestDTO = ClientRequestDTO.builder()
+                .dateDeNaissance(LocalDate.of(2000, 7, 17))
+                .build();
+
+        Client clientInfosAModifier = Client.builder()
+                .dateDeNaissance(LocalDate.of(2000, 7, 17))
+                .build();
+
+        Client clientAEnregistrer = creerClientDylan();
+        clientAEnregistrer.setDateDeNaissance(clientInfosAModifier.getDateDeNaissance());
+
+        Client clientEnregistre = creerClientDylan();
+        clientEnregistre.setDateDeNaissance(clientInfosAModifier.getDateDeNaissance());
+
+        HashSet<Permis> permis = new HashSet<>(List.of(Permis.B));
+        ClientResponseDTO responseDTO = new ClientResponseDTO(
+                "Morgan",
+                "Dylan",
+                new AdresseDTO(48, "rue Hector Berlioz", "44300", "Nantes"),
+                "dylan@mail.com",
+                LocalDate.of(2000, 7, 17),
+                LocalDate.now(),
+                permis,
+                false
+        );
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(clientAModifier));
+        Mockito.when(mockMapper.toClient(requestDTO)).thenReturn(clientInfosAModifier);
+        Mockito.when(mockDao.save(clientAEnregistrer)).thenReturn(clientEnregistre);
+        Mockito.when(mockMapper.toClientResponseDTO(clientEnregistre)).thenReturn(responseDTO);
+
+        assertEquals(responseDTO, clientService.modifier("dylan@mail.com", "P@55w0rd", requestDTO));
+        Mockito.verify(mockDao, Mockito.times(1)).save(clientAEnregistrer);
+    }
+
+    @DisplayName("Si modifier(email ok, password ok, modifier permis)")
+    @Test
+    void testModifierPermis() {
+        Client clientAModifier = creerClientDylan();
+        HashSet<Permis> permis = new HashSet<>(List.of(Permis.B, Permis.A));
+
+        ClientRequestDTO requestDTO = ClientRequestDTO.builder()
+                .permis(permis)
+                .build();
+
+        Client clientInfosAModifier = Client.builder()
+                .permis(permis)
+                .build();
+
+        Client clientAEnregistrer = creerClientDylan();
+        clientAEnregistrer.setPermis(clientInfosAModifier.getPermis());
+
+        Client clientEnregistre = creerClientDylan();
+        clientEnregistre.setPermis(clientInfosAModifier.getPermis());
+
+        ClientResponseDTO responseDTO = new ClientResponseDTO(
+                "Morgan",
+                "Dylan",
+                new AdresseDTO(48, "rue Hector Berlioz", "44300", "Nantes"),
+                "dylan@mail.com",
+                LocalDate.of(2000, 7, 17),
+                LocalDate.now(),
+                permis,
+                false
+        );
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(clientAModifier));
+        Mockito.when(mockMapper.toClient(requestDTO)).thenReturn(clientInfosAModifier);
+        Mockito.when(mockDao.save(clientAEnregistrer)).thenReturn(clientEnregistre);
+        Mockito.when(mockMapper.toClientResponseDTO(clientEnregistre)).thenReturn(responseDTO);
+
+        assertEquals(responseDTO, clientService.modifier("dylan@mail.com", "P@55w0rd", requestDTO));
+        Mockito.verify(mockDao, Mockito.times(1)).save(clientAEnregistrer);
+    }
+
+    /*
+    HashSet<Permis> permis = new HashSet<>(List.of(Permis.B));
+
+    ClientRequestDTO requestDTO = new ClientRequestDTO(
+                "Dylan",
+                "Demasse",
+                new AdresseDTO(48, "rue Hector Berlioz", "44300", "Nantes"),
+                "dylan@mail.com",
+                "P@55w0rd",
+                LocalDate.of(1999, 7, 17),
+                LocalDate.now(),
+                permis,
+                false
+        );
+     */
     private static Client creerClientDylan() {
         HashSet<Permis> permis = new HashSet<>(List.of(Permis.B));
 
@@ -546,8 +972,6 @@ class ClientServiceImplTest {
                 false
         );
     }
-
-
 
 
 }
