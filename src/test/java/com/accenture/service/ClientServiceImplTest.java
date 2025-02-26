@@ -883,9 +883,12 @@ class ClientServiceImplTest {
                 .permis(permis)
                 .build();
 
-        Client clientInfosAModifier = Client.builder()
-                .permis(permis)
-                .build();
+        System.out.println("requestDTO : " + requestDTO);
+
+        Client clientInfosAModifier = new Client();
+        clientInfosAModifier.setPermis(permis);
+
+        System.out.println("clientInfosAModifier : " + clientInfosAModifier);
 
         Client clientAEnregistrer = creerClientDylan();
         clientAEnregistrer.setPermis(clientInfosAModifier.getPermis());
