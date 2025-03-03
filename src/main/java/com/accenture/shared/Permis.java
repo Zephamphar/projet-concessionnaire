@@ -10,5 +10,5 @@ public enum Permis {
     C1E,
     BE,
     CE,
-    DE
+    D1
 }
