@@ -1,10 +1,13 @@
 package com.accenture.service;
 
 import com.accenture.exception.AdministrateurException;
-import com.accenture.exception.ClientException;
+import com.accenture.exception.AdministrateurException;
 import com.accenture.repository.AdministrateurDAO;
 import com.accenture.repository.entity.Administrateur;
-import com.accenture.repository.entity.Client;
+import com.accenture.repository.entity.Administrateur;
+import com.accenture.repository.entity.Administrateur;
+import com.accenture.service.dto.AdministrateurRequestDTO;
+import com.accenture.service.dto.AdministrateurResponseDTO;
 import com.accenture.service.dto.AdministrateurRequestDTO;
 import com.accenture.service.dto.AdministrateurResponseDTO;
 import com.accenture.service.mapper.AdministrateurMapper;
@@ -12,6 +15,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -27,7 +31,7 @@ public class AdministrateurServiceImpl implements AdministrateurService {
     }
 
     /**
-     * <p>Méthode permettant d'ajouter un Client en base</p>
+     * <p>Méthode permettant d'ajouter un Administrateur en base</p>
      * @param administrateurRequestDTO L'objet métier administrateur, non null
      * @return AdministrateurResponseDTO
      * @throws AdministrateurException Si l'Administrateur ne répond pas aux règles métier
@@ -75,11 +79,25 @@ public class AdministrateurServiceImpl implements AdministrateurService {
         return administrateurMapper
                 .toAdministrateurResponseDTO(
                         administrateurDAO.findByEmailAndPassword(email, password)
-                                .orElseThrow(() -> new ClientException("Mot de passe incorrect."))
+                                .orElseThrow(() -> new AdministrateurException("Mot de passe incorrect."))
                 );
     }
 
-    /**4
+    public AdministrateurResponseDTO modifier(String email, String password, AdministrateurRequestDTO administrateurRequestDTO) {
+        if(administrateurRequestDTO == null)
+            throw new AdministrateurException("Aucune information reçue.");
+        Optional<Administrateur> optionalAdministrateur = administrateurDAO.findByEmailAndPassword(email, password);
+        Administrateur administrateurAModifier = optionalAdministrateur.orElseThrow(() -> new AdministrateurException("Identifiants invalides"));
+
+        Administrateur nouvelAdministrateur = administrateurMapper.toAdministrateur(administrateurRequestDTO);
+
+        remplacer(nouvelAdministrateur, administrateurAModifier);
+
+        Administrateur administrateurEnregistre = administrateurDAO.save(administrateurAModifier);
+        return administrateurMapper.toAdministrateurResponseDTO(administrateurEnregistre);
+    }
+
+    /**
      * <p>Méthode permettant à un Administrateur de supprimer son propre compte.</p>
      * @param email E-mail de l'Administrateur
      * @param password Mot de passe de l'Administrateur
@@ -116,7 +134,21 @@ public class AdministrateurServiceImpl implements AdministrateurService {
         if(!administrateurRequestDTO.password().matches(REGEX_PASSWORD))
             throw new AdministrateurException("Le mot de passe doit comporter au moins une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial parmi les suivants : & # @ - _ §");
         if(administrateurRequestDTO.fonction() == null || administrateurRequestDTO.fonction().isBlank())
-            throw new AdministrateurException("La fonction est obligatoire");
+            throw new AdministrateurException("La fonction est obligatoire.");
+    }
+
+    private void remplacer(Administrateur nouvelAdministrateur, Administrateur administrateurAModifier) {
+        if(!(nouvelAdministrateur.getPassword() == null || nouvelAdministrateur.getPassword().isBlank())) {
+            if(!nouvelAdministrateur.getPassword().matches(REGEX_PASSWORD))
+                throw new AdministrateurException("Le mot de passe doit comporter au moins une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial parmi les suivants : & # @ - _ §");
+            administrateurAModifier.setPassword(nouvelAdministrateur.getPassword());
+        }
+        if(nouvelAdministrateur.getPrenom() != null && !nouvelAdministrateur.getPrenom().isBlank())
+            administrateurAModifier.setPrenom(nouvelAdministrateur.getPrenom());
+        if(nouvelAdministrateur.getNom() != null && !nouvelAdministrateur.getNom().isBlank())
+            administrateurAModifier.setNom(nouvelAdministrateur.getNom());
+        if(nouvelAdministrateur.getFonction() != null && !nouvelAdministrateur.getFonction().isBlank())
+            administrateurAModifier.setFonction(nouvelAdministrateur.getFonction());
     }
 
 }

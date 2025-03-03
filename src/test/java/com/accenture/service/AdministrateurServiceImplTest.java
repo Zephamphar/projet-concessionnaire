@@ -1,10 +1,8 @@
 package com.accenture.service;
 
 import com.accenture.exception.AdministrateurException;
-import com.accenture.exception.ClientException;
 import com.accenture.repository.AdministrateurDAO;
 import com.accenture.repository.entity.Administrateur;
-import com.accenture.repository.entity.Client;
 import com.accenture.service.dto.*;
 import com.accenture.service.mapper.AdministrateurMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -188,9 +186,9 @@ class AdministrateurServiceImplTest {
         assertThrows(AdministrateurException.class, () -> administrateurService.ajouter(dto));
     }
 
-    @DisplayName("Si ajouter(ok), on récupère la ClientResponseDTO")
+    @DisplayName("Si ajouter(ok), on récupère la AdministrateurResponseDTO")
     @Test
-    void ajouterClientOK() {
+    void ajouterAdministrateurOK() {
         AdministrateurRequestDTO requestDTO = creerAdministrateurRequestDTODylan();
         AdministrateurResponseDTO responseDTO = creerAdministrateurResponseDTODylan();
         Administrateur administrateurAvant = creerAdministrateurDylan();
@@ -237,7 +235,7 @@ class AdministrateurServiceImplTest {
         assertThrows(EntityNotFoundException.class, () -> administrateurService.recupererMonCompte("test@teast.com", "P@55w0rd"));
     }
 
-    @DisplayName("Si ajouter(ok), on récupère la ClientResponseDTO")
+    @DisplayName("Si ajouter(ok), on récupère la AdministrateurResponseDTO")
     @Test
     void testRecupererMonCompteOK() {
         AdministrateurResponseDTO responseDTO = creerAdministrateurResponseDTODylan();
@@ -311,6 +309,234 @@ class AdministrateurServiceImplTest {
         Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(administrateur1));
         administrateurService.supprimer("dylan@mail.com", "P@55w0rd");
         Mockito.verify(mockDao, Mockito.times(1)).delete(administrateur1);
+    }
+
+
+
+    @DisplayName("Si modifier(null), exception levée")
+    @Test
+    void testModifierNull() {
+        assertThrows(AdministrateurException.class, () -> administrateurService.modifier("dylan@mail.com", "P@55w0rd", null));
+    }
+
+    @DisplayName("Si modifier(email incorrect), exception levée")
+    @Test
+    void testModifierEmailIncorrect() {
+        AdministrateurRequestDTO requestDTO = creerAdministrateurRequestDTODylan();
+
+        Mockito.when(mockDao.findByEmailAndPassword("dlan@mail.com", "P@55w0rd")).thenReturn(Optional.empty());
+        assertThrows(AdministrateurException.class, () -> administrateurService.modifier("dlan@mail.com", "P@55w0rd", requestDTO));
+    }
+
+    @DisplayName("Si modifier(password incorrect), exception levée")
+    @Test
+    void testModifierPasswordIncorrect() {
+        AdministrateurRequestDTO requestDTO = creerAdministrateurRequestDTODylan();
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P55w0rd")).thenReturn(Optional.empty());
+        assertThrows(AdministrateurException.class, () -> administrateurService.modifier("dylan@mail.com", "P55w0rd", requestDTO));
+    }
+
+    @DisplayName("Si modifier(email null), exception levée")
+    @Test
+    void testModifierEmailNull() {
+        AdministrateurRequestDTO requestDTO = creerAdministrateurRequestDTODylan();
+
+        Mockito.when(mockDao.findByEmailAndPassword(null, "P@55w0rd")).thenReturn(Optional.empty());
+        assertThrows(AdministrateurException.class, () -> administrateurService.modifier(null, "P@55w0rd", requestDTO));
+    }
+
+    @DisplayName("Si modifier(password null), exception levée")
+    @Test
+    void testModifierPasswordNull() {
+        AdministrateurRequestDTO requestDTO = creerAdministrateurRequestDTODylan();
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", null)).thenReturn(Optional.empty());
+        assertThrows(AdministrateurException.class, () -> administrateurService.modifier("dylan@mail.com", null, requestDTO));
+    }
+
+    @DisplayName("Si modifier(email blank), exception levée")
+    @Test
+    void testModifierEmailBlank() {
+        AdministrateurRequestDTO requestDTO = creerAdministrateurRequestDTODylan();
+
+        Mockito.when(mockDao.findByEmailAndPassword("   \t   ", "P@55w0rd")).thenReturn(Optional.empty());
+        assertThrows(AdministrateurException.class, () -> administrateurService.modifier("   \t   ", "P@55w0rd", requestDTO));
+    }
+
+    @DisplayName("Si modifier(password blank), exception levée")
+    @Test
+    void testModifierPasswordBlank() {
+        AdministrateurRequestDTO requestDTO = creerAdministrateurRequestDTODylan();
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "   \t   ")).thenReturn(Optional.empty());
+        assertThrows(AdministrateurException.class, () -> administrateurService.modifier("dylan@mail.com", "   \t   ", requestDTO));
+    }
+
+    @DisplayName("Si modifier(email ok, password ok, modifier prenom)")
+    @Test
+    void testModifierPrenom() {
+        Administrateur administrateurAModifier = creerAdministrateurDylan();
+
+        AdministrateurRequestDTO requestDTO = AdministrateurRequestDTO.builder()
+                .prenom("Maleck Jr")
+                .build();
+
+        Administrateur administrateurInfosAModifier = Administrateur.builder()
+                .prenom("Maleck Jr")
+                .build();
+
+        Administrateur administrateurAEnregistrer = creerAdministrateurDylan();
+        administrateurAEnregistrer.setPrenom(administrateurInfosAModifier.getPrenom());
+
+        Administrateur administrateurEnregistre = creerAdministrateurDylan();
+        administrateurEnregistre.setPrenom(administrateurInfosAModifier.getPrenom());
+
+        AdministrateurResponseDTO responseDTO = new AdministrateurResponseDTO(
+                "Demasse",
+                "Maleck Jr",
+                "dylan@mail.com",
+                "CEO"
+        );
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(administrateurAModifier));
+        Mockito.when(mockMapper.toAdministrateur(requestDTO)).thenReturn(administrateurInfosAModifier);
+        Mockito.when(mockDao.save(administrateurAEnregistrer)).thenReturn(administrateurEnregistre);
+        Mockito.when(mockMapper.toAdministrateurResponseDTO(administrateurEnregistre)).thenReturn(responseDTO);
+
+        assertEquals(responseDTO, administrateurService.modifier("dylan@mail.com", "P@55w0rd", requestDTO));
+        Mockito.verify(mockDao, Mockito.times(1)).save(administrateurAEnregistrer);
+    }
+
+
+    @DisplayName("Si modifier(email ok, password ok, modifier nom)")
+    @Test
+    void testModifierNom() {
+        Administrateur administrateurAModifier = creerAdministrateurDylan();
+
+        AdministrateurRequestDTO requestDTO = AdministrateurRequestDTO.builder()
+                .nom("Morgan")
+                .build();
+
+        Administrateur administrateurInfosAModifier = Administrateur.builder()
+                .nom("Morgan")
+                .build();
+
+        Administrateur administrateurAEnregistrer = creerAdministrateurDylan();
+        administrateurAEnregistrer.setNom(administrateurInfosAModifier.getNom());
+
+        Administrateur administrateurEnregistre = creerAdministrateurDylan();
+        administrateurEnregistre.setNom(administrateurInfosAModifier.getNom());
+
+        AdministrateurResponseDTO responseDTO = new AdministrateurResponseDTO(
+                "Morgan",
+                "Dylan",
+                "dylan@mail.com",
+                "CEO"
+        );
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(administrateurAModifier));
+        Mockito.when(mockMapper.toAdministrateur(requestDTO)).thenReturn(administrateurInfosAModifier);
+        Mockito.when(mockDao.save(administrateurAEnregistrer)).thenReturn(administrateurEnregistre);
+        Mockito.when(mockMapper.toAdministrateurResponseDTO(administrateurEnregistre)).thenReturn(responseDTO);
+
+        assertEquals(responseDTO, administrateurService.modifier("dylan@mail.com", "P@55w0rd", requestDTO));
+        Mockito.verify(mockDao, Mockito.times(1)).save(administrateurAEnregistrer);
+    }
+
+    @DisplayName("Si modifier(email ok, password ok, modifier password non conforme), exception levée")
+    @Test
+    void testModifierPasswordNonConforme() {
+        Administrateur administrateurAModifier = creerAdministrateurDylan();
+
+        AdministrateurRequestDTO requestDTO = AdministrateurRequestDTO.builder()
+                .password("password")
+                .build();
+
+        Administrateur administrateurInfosAModifier = Administrateur.builder()
+                .password("password")
+                .build();
+
+        Administrateur administrateurAEnregistrer = creerAdministrateurDylan();
+        administrateurAEnregistrer.setPassword(administrateurInfosAModifier.getPassword());
+
+        Administrateur administrateurEnregistre = creerAdministrateurDylan();
+        administrateurEnregistre.setPassword(administrateurInfosAModifier.getPassword());
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(administrateurAModifier));
+        Mockito.when(mockMapper.toAdministrateur(requestDTO)).thenReturn(administrateurInfosAModifier);
+
+        assertThrows(AdministrateurException.class, () -> administrateurService.modifier("dylan@mail.com", "P@55w0rd", requestDTO));
+    }
+
+    @DisplayName("Si modifier(email ok, password ok, modifier password)")
+    @Test
+    void testModifierPasswordOK() {
+        Administrateur administrateurAModifier = creerAdministrateurDylan();
+
+        AdministrateurRequestDTO requestDTO = AdministrateurRequestDTO.builder()
+                .password("P@55w0rd1")
+                .build();
+
+        Administrateur administrateurInfosAModifier = Administrateur.builder()
+                .password("P@55w0rd1")
+                .build();
+
+        Administrateur administrateurAEnregistrer = creerAdministrateurDylan();
+        administrateurAEnregistrer.setPassword(administrateurInfosAModifier.getPassword());
+
+        Administrateur administrateurEnregistre = creerAdministrateurDylan();
+        administrateurEnregistre.setPassword(administrateurInfosAModifier.getPassword());
+
+        AdministrateurResponseDTO responseDTO = new AdministrateurResponseDTO(
+                "Morgan",
+                "Dylan",
+                "dylan@mail.com",
+                "CEO"
+        );
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(administrateurAModifier));
+        Mockito.when(mockMapper.toAdministrateur(requestDTO)).thenReturn(administrateurInfosAModifier);
+        Mockito.when(mockDao.save(administrateurAEnregistrer)).thenReturn(administrateurEnregistre);
+        Mockito.when(mockMapper.toAdministrateurResponseDTO(administrateurEnregistre)).thenReturn(responseDTO);
+
+        assertEquals(responseDTO, administrateurService.modifier("dylan@mail.com", "P@55w0rd", requestDTO));
+        Mockito.verify(mockDao, Mockito.times(1)).save(administrateurAEnregistrer);
+    }
+
+    @DisplayName("Si modifier(email ok, password ok, modifier fonction)")
+    @Test
+    void testModifierFonction() {
+        Administrateur administrateurAModifier = creerAdministrateurDylan();
+
+        AdministrateurRequestDTO requestDTO = AdministrateurRequestDTO.builder()
+                .fonction("Sultan")
+                .build();
+
+        Administrateur administrateurInfosAModifier = Administrateur.builder()
+                .fonction("Sultan")
+                .build();
+
+        Administrateur administrateurAEnregistrer = creerAdministrateurDylan();
+        administrateurAEnregistrer.setFonction(administrateurInfosAModifier.getFonction());
+
+        Administrateur administrateurEnregistre = creerAdministrateurDylan();
+        administrateurEnregistre.setFonction(administrateurInfosAModifier.getFonction());
+
+        AdministrateurResponseDTO responseDTO = new AdministrateurResponseDTO(
+                "Morgan",
+                "Dylan",
+                "dylan@mail.com",
+                "Sultan"
+        );
+
+        Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(administrateurAModifier));
+        Mockito.when(mockMapper.toAdministrateur(requestDTO)).thenReturn(administrateurInfosAModifier);
+        Mockito.when(mockDao.save(administrateurAEnregistrer)).thenReturn(administrateurEnregistre);
+        Mockito.when(mockMapper.toAdministrateurResponseDTO(administrateurEnregistre)).thenReturn(responseDTO);
+
+        assertEquals(responseDTO, administrateurService.modifier("dylan@mail.com", "P@55w0rd", requestDTO));
+        Mockito.verify(mockDao, Mockito.times(1)).save(administrateurAEnregistrer);
     }
 
     private static Administrateur creerAdministrateurDylan() {

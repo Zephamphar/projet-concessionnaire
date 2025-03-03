@@ -883,12 +883,8 @@ class ClientServiceImplTest {
                 .permis(permis)
                 .build();
 
-        System.out.println("requestDTO : " + requestDTO);
-
         Client clientInfosAModifier = new Client();
         clientInfosAModifier.setPermis(permis);
-
-        System.out.println("clientInfosAModifier : " + clientInfosAModifier);
 
         Client clientAEnregistrer = creerClientDylan();
         clientAEnregistrer.setPermis(clientInfosAModifier.getPermis());
@@ -916,21 +912,7 @@ class ClientServiceImplTest {
         Mockito.verify(mockDao, Mockito.times(1)).save(clientAEnregistrer);
     }
 
-    /*
-    HashSet<Permis> permis = new HashSet<>(List.of(Permis.B));
 
-    ClientRequestDTO requestDTO = new ClientRequestDTO(
-                "Dylan",
-                "Demasse",
-                new AdresseDTO(48, "rue Hector Berlioz", "44300", "Nantes"),
-                "dylan@mail.com",
-                "P@55w0rd",
-                LocalDate.of(1999, 7, 17),
-                LocalDate.now(),
-                permis,
-                false
-        );
-     */
     private static Client creerClientDylan() {
         HashSet<Permis> permis = new HashSet<>(List.of(Permis.B));
 
