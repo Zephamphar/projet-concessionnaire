@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 
 @Entity
@@ -26,4 +25,13 @@ public abstract class Vehicule {
     private boolean actif;
     private boolean retireDuParc;
 
+    public Vehicule(String marque, String modele, String couleur, int tarifJournalier, int kilometrage, boolean actif, boolean retireDuParc) {
+        this.marque = marque;
+        this.modele = modele;
+        this.couleur = couleur;
+        this.tarifJournalier = tarifJournalier;
+        this.kilometrage = kilometrage;
+        this.actif = actif;
+        this.retireDuParc = retireDuParc;
+    }
 }

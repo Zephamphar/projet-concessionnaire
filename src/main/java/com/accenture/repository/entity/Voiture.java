@@ -31,4 +31,15 @@ public class Voiture extends Vehicule {
     private TypeVoiture typeVoiture;
     private Permis permis;
 
+    public Voiture(String marque, String modele, String couleur, int nombrePlaces, TypeCarburant typeCarburant, int nombrePortes, Transmission transmission, boolean climatisation, int nombreBagages, TypeVoiture typeVoiture, Permis permis,  int tarifJournalier, int kilometrage, boolean actif, boolean retireDuParc) {
+        super(marque, modele, couleur, tarifJournalier, kilometrage, actif, retireDuParc);
+        this.nombrePlaces = nombrePlaces;
+        this.typeCarburant = typeCarburant;
+        this.nombrePortes = nombrePortes;
+        this.transmission = transmission;
+        this.climatisation = climatisation;
+        this.nombreBagages = nombreBagages;
+        this.typeVoiture = typeVoiture;
+        this.permis = permis;
+    }
 }
