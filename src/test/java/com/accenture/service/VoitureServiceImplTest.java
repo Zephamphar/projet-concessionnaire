@@ -53,9 +53,7 @@ class VoitureServiceImplTest {
                 TypeVoiture.CITADINE,
                 Permis.B,
                 50,
-                5000,
-                true,
-                false
+                5000
         );
         Voiture voiture = new Voiture(
                 null,
@@ -94,9 +92,7 @@ class VoitureServiceImplTest {
                 TypeVoiture.CITADINE,
                 Permis.B,
                 50,
-                5000,
-                true,
-                false
+                5000
         );
         Voiture voiture = new Voiture(
                 null,
@@ -136,9 +132,7 @@ class VoitureServiceImplTest {
                 TypeVoiture.CITADINE,
                 Permis.B,
                 50,
-                5000,
-                true,
-                false
+                5000
         );
 
         Voiture voiture = new Voiture(
@@ -179,9 +173,7 @@ class VoitureServiceImplTest {
                 TypeVoiture.CITADINE,
                 Permis.B,
                 50,
-                5000,
-                true,
-                false
+                5000
         );
 
         Voiture voiture = new Voiture(
@@ -222,9 +214,7 @@ class VoitureServiceImplTest {
                 TypeVoiture.CITADINE,
                 Permis.B,
                 50,
-                5000,
-                true,
-                false
+                5000
         );
 
         Voiture voiture = new Voiture(
@@ -265,9 +255,7 @@ class VoitureServiceImplTest {
                 TypeVoiture.CITADINE,
                 Permis.B,
                 50,
-                5000,
-                true,
-                false
+                5000
         );
 
         Voiture voiture = new Voiture(
@@ -308,9 +296,7 @@ class VoitureServiceImplTest {
                 TypeVoiture.CITADINE,
                 Permis.B,
                 50,
-                5000,
-                true,
-                false
+                5000
         );
 
         Voiture voiture = new Voiture(
@@ -351,9 +337,7 @@ class VoitureServiceImplTest {
                 TypeVoiture.CITADINE,
                 Permis.B,
                 50,
-                5000,
-                true,
-                false
+                5000
         );
 
         Voiture voiture = new Voiture(
@@ -394,9 +378,7 @@ class VoitureServiceImplTest {
                 TypeVoiture.CITADINE,
                 Permis.B,
                 50,
-                5000,
-                true,
-                false
+                5000
         );
 
         Voiture voiture = new Voiture(
@@ -437,9 +419,7 @@ class VoitureServiceImplTest {
                 TypeVoiture.CITADINE,
                 Permis.B,
                 50,
-                5000,
-                true,
-                false
+                5000
         );
 
         Voiture voiture = new Voiture(
@@ -480,9 +460,7 @@ class VoitureServiceImplTest {
                 TypeVoiture.CITADINE,
                 Permis.B,
                 50,
-                5000,
-                true,
-                false
+                5000
         );
 
         Voiture voiture = new Voiture(
@@ -523,9 +501,7 @@ class VoitureServiceImplTest {
                 null,
                 Permis.B,
                 50,
-                5000,
-                true,
-                false
+                5000
         );
 
         Voiture voiture = new Voiture(
@@ -566,9 +542,7 @@ class VoitureServiceImplTest {
                 TypeVoiture.CITADINE,
                 Permis.B,
                 0,
-                5000,
-                true,
-                false
+                5000
         );
 
         Voiture voiture = new Voiture(
@@ -666,9 +640,7 @@ class VoitureServiceImplTest {
                 TypeVoiture.CITADINE,
                 Permis.B,
                 50,
-                5000,
-                true,
-                false
+                5000
         );
     }
 

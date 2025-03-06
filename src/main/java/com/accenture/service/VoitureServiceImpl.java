@@ -4,7 +4,9 @@ import com.accenture.exception.VoitureException;
 import com.accenture.repository.LocationDAO;
 import com.accenture.repository.VoitureDAO;
 import com.accenture.repository.entity.Location;
+import com.accenture.repository.entity.Moto;
 import com.accenture.repository.entity.Voiture;
+import com.accenture.service.dto.VehiculeDTO;
 import com.accenture.service.dto.VoitureRequestDTO;
 import com.accenture.service.dto.VoitureResponseDTO;
 import com.accenture.service.mapper.VoitureMapper;
@@ -12,6 +14,7 @@ import com.accenture.shared.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -123,7 +126,17 @@ public class VoitureServiceImpl implements VoitureService {
         Voiture voitureAModifier = voitureDAO.findById(id).orElseThrow(() -> new EntityNotFoundException("Aucune voiture à cet ID."));
 
         modifierVoiture(voitureRequestDTO, voitureAModifier);
-
+//        //*****
+//        VehiculeDTO vehiculeDTO = new VehiculeDTO(new ArrayList<>(), new ArrayList<>());
+//
+//        List<Moto> listeMotos = listeLocations.stream()
+//                .filter(l -> l.vehicule() instanceof Moto)
+//                .map(l -> l.vehicule())
+//                .toList();
+//
+//        vehiculeDTO.listeMotos().addAll(listeMotos);
+//
+//        //*****
         Voiture voitureModifiee = voitureDAO.save(voitureAModifier);
         return voitureMapper.toVoitureResponseDTO(voitureModifiee);
     }
@@ -139,23 +152,23 @@ public class VoitureServiceImpl implements VoitureService {
             voitureAModifier.setModele(voitureRequestDTO.modele());
         if (voitureRequestDTO.couleur() != null && !voitureRequestDTO.couleur().isBlank())
             voitureAModifier.setCouleur(voitureRequestDTO.couleur());
-        if (voitureRequestDTO.nombrePlaces() != 0)
+        if (voitureRequestDTO.nombrePlaces() > 0)
             voitureAModifier.setNombrePlaces(voitureRequestDTO.nombrePlaces());
         if (voitureRequestDTO.typeCarburant() != null)
             voitureAModifier.setTypeCarburant(voitureRequestDTO.typeCarburant());
-        if (voitureRequestDTO.nombrePortes() != 0)
+        if (voitureRequestDTO.nombrePortes() > 0)
             voitureAModifier.setNombrePortes(voitureRequestDTO.nombrePortes());
         if (voitureRequestDTO.transmission() != null)
             voitureAModifier.setTransmission(voitureRequestDTO.transmission());
         if (voitureRequestDTO.climatisation() != voitureAModifier.isClimatisation())
             voitureAModifier.setClimatisation(voitureRequestDTO.climatisation());
-        if (voitureRequestDTO.nombreBagages() != 0)
+        if (voitureRequestDTO.nombreBagages() > 0)
             voitureAModifier.setNombreBagages(voitureRequestDTO.nombreBagages());
         if (voitureRequestDTO.typeVoiture() != null)
             voitureAModifier.setTypeVoiture(voitureRequestDTO.typeVoiture());
-        if (voitureRequestDTO.tarifJournalier() != 0)
+        if (voitureRequestDTO.tarifJournalier() > 0)
             voitureAModifier.setTarifJournalier(voitureRequestDTO.tarifJournalier());
-        if (voitureRequestDTO.kilometrage() != 0)
+        if (voitureRequestDTO.kilometrage() > 0)
             voitureAModifier.setKilometrage(voitureAModifier.getKilometrage());
     }
 
@@ -168,19 +181,19 @@ public class VoitureServiceImpl implements VoitureService {
             throw new VoitureException("Le modele est obligatoire.");
         if (voiture.getCouleur() == null || voiture.getCouleur().isBlank())
             throw new VoitureException("La couleur est obligatoire.");
-        if (voiture.getNombrePlaces() == 0)
+        if (voiture.getNombrePlaces() <= 0)
             throw new VoitureException("Le nombre de places est obligatoire.");
         if (voiture.getTypeCarburant() == null)
             throw new VoitureException("Le type de carburant est obligatoire.");
-        if (voiture.getNombrePortes() == 0)
+        if (voiture.getNombrePortes() <= 0)
             throw new VoitureException("Le nombre de portes est obligatoire.");
         if (voiture.getTransmission() == null)
             throw new VoitureException("Le type de transmission est obligatoire.");
-        if (voiture.getNombreBagages() == 0)
+        if (voiture.getNombreBagages() <= 0)
             throw new VoitureException("Le nombre de bagages est obligatoire.");
         if (voiture.getTypeVoiture() == null)
             throw new VoitureException("Le type de voiture est obligatoire.");
-        if (voiture.getTarifJournalier() == 0)
+        if (voiture.getTarifJournalier() <= 0)
             throw new VoitureException("Le tarif journalier est obligatoire.");
 
         voiture.setPermis(voiture.getNombrePlaces() < 10 ? Permis.B : Permis.D1);

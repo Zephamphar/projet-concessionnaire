@@ -18,7 +18,7 @@ import java.util.Optional;
 public class AdministrateurServiceImpl implements AdministrateurService {
 
     private final AdministrateurDAO administrateurDAO;
-    public final AdministrateurMapper administrateurMapper;
+    private final AdministrateurMapper administrateurMapper;
     private final PasswordEncoder passwordEncoder;
     private final String REGEX_PASSWORD = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#@&-_§]).{8,16}$";
 

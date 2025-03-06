@@ -18,8 +18,6 @@ public record VoitureRequestDTO(
         TypeVoiture typeVoiture,
         Permis permis,
         int tarifJournalier,
-        int kilometrage,
-        boolean actif,
-        boolean retireDuParc
+        int kilometrage
 ) {
 }
