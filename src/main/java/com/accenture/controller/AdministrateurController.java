@@ -53,6 +53,12 @@ public class AdministrateurController {
         return ResponseEntity.created(location).build();
     }
 
+    @PatchMapping
+    ResponseEntity<AdministrateurResponseDTO> modifier(String email, String password, AdministrateurRequestDTO administrateurRequestDTO) {
+        AdministrateurResponseDTO adminModifie = administrateurService.modifier(email, password, administrateurRequestDTO);
+        return ResponseEntity.ok(adminModifie);
+    }
+
     @DeleteMapping
     ResponseEntity<Void> supprimer(String email, String password) {
         administrateurService.supprimer(email, password);

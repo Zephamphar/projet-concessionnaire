@@ -89,6 +89,14 @@ public class ClientServiceImpl implements ClientService {
                 .toList();
     }
 
+    /**
+     * <p>Méthode permettant de modifier les informations d'un Client</p>
+     * @param email E-mail du Client à modifier
+     * @param password Mot de passe du Client à modifier
+     * @param clientRequestDTO ClientRequestDTO contenant les nouvelles valeurs à modifier
+     * @return La ClientResponseDTO mappée à partir du Client modifié
+     */
+
     @Override
     public ClientResponseDTO modifier(String email, String password, ClientRequestDTO clientRequestDTO) {
         if(clientRequestDTO == null)
@@ -103,6 +111,13 @@ public class ClientServiceImpl implements ClientService {
         Client clientEnregistre = clientDAO.save(clientAModifier);
         return clientMapper.toClientResponseDTO(clientEnregistre);
     }
+
+    /**
+     * <p>Méthode permettant de supprimer un Client de la base. Si le client a des locations passées, il est simplement désactivé.</p>
+     * @param email E-mail du Client à supprimer
+     * @param password Mot de passe du Client à supprimer
+     * @throws ClientException Si le Client ne fournit pas d'identifiants ou si ils sont incorrects
+     */
 
     @Override
     public void supprimer(String email, String password) throws ClientException {

@@ -11,5 +11,8 @@ public interface AdministrateurService {
     AdministrateurResponseDTO ajouter(AdministrateurRequestDTO administrateurRequestDTO) throws AdministrateurException;
     List<AdministrateurResponseDTO> trouverTous();
     AdministrateurResponseDTO recupererMonCompte(String email, String password);
+
+    AdministrateurResponseDTO modifier(String email, String password, AdministrateurRequestDTO administrateurRequestDTO);
+
     void supprimer(String email, String password) throws AdministrateurException;
 }

@@ -1,17 +1,13 @@
 package com.accenture.service;
 
 import com.accenture.exception.AdministrateurException;
-import com.accenture.exception.AdministrateurException;
 import com.accenture.repository.AdministrateurDAO;
 import com.accenture.repository.entity.Administrateur;
-import com.accenture.repository.entity.Administrateur;
-import com.accenture.repository.entity.Administrateur;
-import com.accenture.service.dto.AdministrateurRequestDTO;
-import com.accenture.service.dto.AdministrateurResponseDTO;
 import com.accenture.service.dto.AdministrateurRequestDTO;
 import com.accenture.service.dto.AdministrateurResponseDTO;
 import com.accenture.service.mapper.AdministrateurMapper;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,11 +19,13 @@ public class AdministrateurServiceImpl implements AdministrateurService {
 
     private final AdministrateurDAO administrateurDAO;
     public final AdministrateurMapper administrateurMapper;
+    private final PasswordEncoder passwordEncoder;
     private final String REGEX_PASSWORD = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#@&-_§]).{8,16}$";
 
-    public AdministrateurServiceImpl(AdministrateurDAO administrateurDAO, AdministrateurMapper administrateurMapper) {
+    public AdministrateurServiceImpl(AdministrateurDAO administrateurDAO, AdministrateurMapper administrateurMapper, PasswordEncoder passwordEncoder) {
         this.administrateurDAO = administrateurDAO;
         this.administrateurMapper = administrateurMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -41,6 +39,9 @@ public class AdministrateurServiceImpl implements AdministrateurService {
     public AdministrateurResponseDTO ajouter(AdministrateurRequestDTO administrateurRequestDTO) throws AdministrateurException {
         verifierAdministrateur(administrateurRequestDTO);
         Administrateur admin = administrateurMapper.toAdministrateur(administrateurRequestDTO);
+
+        String passwordChiffre = passwordEncoder.encode(admin.getPassword());
+        admin.setPassword(passwordChiffre);
 
         Administrateur adminRetour = administrateurDAO.save(admin);
         return administrateurMapper.toAdministrateurResponseDTO(adminRetour);
@@ -83,6 +84,15 @@ public class AdministrateurServiceImpl implements AdministrateurService {
                 );
     }
 
+    /**
+     * <p>Méthode permettant de modifier les informations d'un Administrateur</p>
+     * @param email E-mail de l'administrateur à modifier
+     * @param password Mot de passe de l'administrateur à modifier
+     * @param administrateurRequestDTO AdministrateurRequestDTO contenant les nouvelles valeurs à modifier
+     * @return L' AdministrateurResponseDTO mappée à partir de l'Administrateur modifié
+     */
+
+    @Override
     public AdministrateurResponseDTO modifier(String email, String password, AdministrateurRequestDTO administrateurRequestDTO) {
         if(administrateurRequestDTO == null)
             throw new AdministrateurException("Aucune information reçue.");
@@ -112,15 +122,19 @@ public class AdministrateurServiceImpl implements AdministrateurService {
             throw new AdministrateurException("Le mot de passe est obligatoire.");
         Administrateur administrateur = administrateurDAO.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new AdministrateurException("Identifiants incorrects."));
-        if(administrateurDAO.findAll().size() == 1)
+        if(administrateurDAO.count() == 1)
             throw new AdministrateurException("Impossible de supprimer le seul administrateur.");
 
         administrateurDAO.delete(administrateur);
     }
 
+    /* ******************************** *
+     *         Méthodes privées         *
+     * ******************************** */
+
     private void verifierAdministrateur(AdministrateurRequestDTO administrateurRequestDTO) throws AdministrateurException {
         if(administrateurRequestDTO == null)
-           throw new AdministrateurException("L'administrateur ne peut pas être null");
+           throw new AdministrateurException("L'administrateur ne peut pas être null.");
         if(administrateurDAO.existsByEmail(administrateurRequestDTO.email()))
             throw new AdministrateurException("Cet email est déjà utilisé.");
         if(administrateurRequestDTO.nom() == null || administrateurRequestDTO.nom().isBlank())

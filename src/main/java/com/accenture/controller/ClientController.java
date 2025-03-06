@@ -47,6 +47,12 @@ public class ClientController {
         return ResponseEntity.created(location).build();
     }
 
+    @PatchMapping
+    ResponseEntity<ClientResponseDTO> modifier(String email, String password, ClientRequestDTO clientRequestDTO) {
+        ClientResponseDTO clientModifie = clientService.modifier(email, password, clientRequestDTO);
+        return ResponseEntity.ok(clientModifie);
+    }
+
     @DeleteMapping
     ResponseEntity<Void> supprimer(String email, String password) throws ClientException {
         clientService.supprimer(email, password);

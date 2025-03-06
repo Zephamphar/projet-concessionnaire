@@ -294,10 +294,11 @@ class AdministrateurServiceImplTest {
     void testSupprimerLeDernierAdministrateur() {
         Administrateur administrateur = creerAdministrateurDylan();
 
-        Mockito.when(mockDao.findAll()).thenReturn(List.of(administrateur));
+        Mockito.when(mockDao.count()).thenReturn(1L);
         Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(administrateur));
         assertThrows(AdministrateurException.class, () -> administrateurService.supprimer("dylan@mail.com", "P@55w0rd"));
     }
+
 
     @DisplayName("Si supprimer(ok, ok)")
     @Test
@@ -305,7 +306,7 @@ class AdministrateurServiceImplTest {
         Administrateur administrateur1 = creerAdministrateurDylan();
         Administrateur administrateur2 = creerAdministrateurVictorien();
 
-        Mockito.when(mockDao.findAll()).thenReturn(List.of(administrateur1, administrateur2));
+        Mockito.when(mockDao.count()).thenReturn(2L);
         Mockito.when(mockDao.findByEmailAndPassword("dylan@mail.com", "P@55w0rd")).thenReturn(Optional.of(administrateur1));
         administrateurService.supprimer("dylan@mail.com", "P@55w0rd");
         Mockito.verify(mockDao, Mockito.times(1)).delete(administrateur1);
